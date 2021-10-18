@@ -49,7 +49,7 @@ const Scene = () => {
         maxZoom={2}
         minZoom={0.25}
       /> */}
-      <OrbitControls />
+      <OrbitControls maxPolarAngle={Math.PI / 2.5} minPolarAngle={0} maxZoom={2} minZoom={0.25} />
 
       <hemisphereLight color={new THREE.Color('#ffddaa')} groundColor={new THREE.Color('#8888ee')} intensity={0.5} />
       <directionalLight
