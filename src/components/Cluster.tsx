@@ -50,7 +50,6 @@ const Cluster = ({ cluster, geometry, material }: ClusterProps) => {
           position.add(cluster.origin);
 
           const neighbours = neighboursForWorldPosition(position);
-          console.log('🚀 ~ file: Cluster.tsx ~ line 54 ~ Cluster ~ neighbours', neighbours);
 
           if (
             !neighbours[8] ||

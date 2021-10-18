@@ -1,43 +1,55 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { AxesHelper } from 'three';
 
 import GroundPlane from '@components/GroundPlane';
 import InterfaceManager from '@components/InterfaceManager';
 import World from '@components/World';
-import { MapControls, OrthographicCamera } from '@react-three/drei';
+import { MapControls, OrbitControls, OrthographicCamera } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 
 // softShadows();
 
 const Scene = () => {
   const light = useRef<THREE.DirectionalLight | null>(null);
-  const aspect = window.innerWidth / window.innerHeight;
+  const [aspect, setAspect] = useState<number>(0);
   const frustumSize = 16;
+  const camera = useThree((state) => state.camera as THREE.OrthographicCamera);
+
+  useEffect(() => {
+    console.log('🚀 ~ file: Scene.tsx ~ line 33 ~ useEffect ~ camera', camera);
+    setAspect(window.innerWidth / window.innerHeight);
+
+    const handleResize = () => {
+      setAspect(window.innerWidth / window.innerHeight);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    camera.left = (-aspect * frustumSize) / 2;
+    camera.right = (aspect * frustumSize) / 2;
+    camera.top = frustumSize / 2;
+    camera.bottom = -frustumSize / 2;
+
+    camera.updateProjectionMatrix();
+  }, [aspect]);
 
   return (
     <>
-      <OrthographicCamera
-        makeDefault
-        position={[16, 16, 16]}
-        near={0.1}
-        far={128}
-        left={(-aspect * frustumSize) / 2}
-        right={(aspect * frustumSize) / 2}
-        top={frustumSize / 2}
-        bottom={-frustumSize / 2}
-        zoom={0.25}
-      />
-      {/* <OrbitControls makeDefault maxPolarAngle={Math.PI * 0.5} /> */}
+      <OrthographicCamera makeDefault position={[16, 16, 16]} near={0.1} far={128} zoom={0.25} />
 
-      {/* <OrbitControls makeDefault /> */}
-      <MapControls
+      {/* <MapControls
         enableRotate={true}
         maxPolarAngle={Math.PI / 3}
         minPolarAngle={Math.PI / 3}
         maxZoom={2}
         minZoom={0.25}
-      />
+      /> */}
+      <OrbitControls />
 
       <hemisphereLight color={new THREE.Color('#ffddaa')} groundColor={new THREE.Color('#8888ee')} intensity={0.5} />
       <directionalLight

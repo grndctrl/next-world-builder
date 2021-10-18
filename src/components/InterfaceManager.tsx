@@ -79,10 +79,6 @@ const InterfaceManager = () => {
     raycaster.setFromCamera(mouse, camera);
     let distance = -1;
     let closestIntersection: THREE.Intersection | null = null;
-    if (once) {
-      console.log('🚀 ~ file: InterfaceManager.tsx ~ line 118 ~ useFrame ~ camera', camera);
-      once = false;
-    }
 
     clusterRefs.forEach((cluster) => {
       if (cluster.clusterColliderRef.current !== null) {

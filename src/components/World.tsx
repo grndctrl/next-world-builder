@@ -49,7 +49,7 @@ const World = () => {
             const updatedCluster = {
               cluster: clusterByIndex,
               geometry: geometry,
-              material: new THREE.MeshStandardMaterial({ color: '#ff8844' }),
+              material: new THREE.MeshStandardMaterial({ color: '#ff8844', wireframe: false }),
             };
 
             setClusters((clusters) => {
