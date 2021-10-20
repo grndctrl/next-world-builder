@@ -300,7 +300,8 @@ function deform(
       geometry.attributes.position.getZ(index)
     );
 
-    const noisePosition = currentPosition.clone().add(blockWorldPosition);
+    // TODO: Still glitches around the sides (between top / segment row)
+    const noisePosition = currentPosition.clone().add(blockWorldPosition).multiplyScalar(0.5);
 
     const noise = simplexNoise.noise2(noisePosition.x, noisePosition.z) * 0.5;
     const distortion = direction.clone().multiplyScalar(segment).multiplyScalar(noise);
