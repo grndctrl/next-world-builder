@@ -13,7 +13,7 @@ function localPositionFromWorldPosition(worldPosition: THREE.Vector3): THREE.Vec
 }
 
 function clusterOriginFromWorldPosition(worldPosition: THREE.Vector3): THREE.Vector3 {
-  const { clusterSize } = blockStore.getState();
+  const { clusterSize, blockSize } = blockStore.getState();
   const offset = clusterSize * 0.5 - 0.5;
   const clusterOrigin = worldPosition
     .clone()
@@ -40,13 +40,14 @@ function clusterIndexFromOrigin(type: Material, clusterOrigin: THREE.Vector3): n
 }
 
 function indexFromLocalPosition(localPosition: THREE.Vector3): number {
-  const { blockSize, clusterSize } = blockStore.getState();
-  const offset = clusterSize * 0.5 - 0.5;
+  const { blockSize, clusterSize, blocksPerClusterAxis } = blockStore.getState();
+  const offset = blocksPerClusterAxis * 0.5 - 0.5;
   const arrayPosition = localPosition.clone().divideScalar(blockSize).addScalar(offset);
 
   const x = arrayPosition.x;
-  const y = arrayPosition.y * clusterSize;
-  const z = arrayPosition.z * clusterSize * clusterSize;
+  const y = arrayPosition.y * blocksPerClusterAxis;
+  const z = arrayPosition.z * blocksPerClusterAxis * blocksPerClusterAxis;
+
   const index = x + y + z;
 
   return index;
@@ -74,7 +75,7 @@ function isBlockAtWorldPosition(worldPosition: THREE.Vector3): boolean {
   return block;
 }
 
-function neighbourClustersForWordPosition(worldPosition: THREE.Vector3): number[] {
+function neighbourClustersForWorldPosition(worldPosition: THREE.Vector3): number[] {
   const neighbourPositions = neighbourPositionsForWorldPosition(worldPosition);
 
   const clusters: number[] = [];
@@ -171,7 +172,7 @@ export {
   indexFromLocalPosition,
   isBlockAtWorldPosition,
   localPositionFromWorldPosition,
-  neighbourClustersForWordPosition,
+  neighbourClustersForWorldPosition,
   neighbourPositionsForWorldPosition,
   neighboursForWorldPosition,
   neighboursFromHash,

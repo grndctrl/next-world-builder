@@ -15,6 +15,7 @@ const PointerIndicator = ({ intersection }: PointerBlockProps): JSX.Element => {
   const rotation = new THREE.Euler(0, 0, 0);
   const points = [];
   const blockSize = useBlockStore((state) => state.blockSize);
+  const clusterSize = useBlockStore((state) => state.clusterSize);
 
   points.push(new THREE.Vector3(blockSize * -0.5, blockSize * 0.01, blockSize * -0.5));
   points.push(new THREE.Vector3(blockSize * 0.5, blockSize * 0.01, blockSize * -0.5));
@@ -32,12 +33,11 @@ const PointerIndicator = ({ intersection }: PointerBlockProps): JSX.Element => {
   const faceNormal = intersection.face?.normal;
 
   if (intersection.object.name === 'groundPlane') {
-    origin.set(
-      Math.floor(intersection.point.x) + 0.5 * blockSize,
-      -2.5,
-      Math.floor(intersection.point.z) + 0.5 * blockSize
-    );
+    const x = Math.floor(intersection.point.x / blockSize) * blockSize + 0.5 * blockSize;
+    const y = clusterSize * -0.5 - blockSize * 0.5;
+    const z = Math.floor(intersection.point.z / blockSize) * blockSize + 0.5 * blockSize;
 
+    origin.set(x, y, z);
     faceNormal?.set(0, 1, 0);
   }
 

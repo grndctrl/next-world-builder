@@ -8,10 +8,10 @@ import { useBlockStore } from '@utilities/BlockStore';
 import {
   clusterIndexFromOrigin,
   clusterOriginFromWorldPosition,
-  neighbourClustersForWordPosition,
+  neighbourClustersForWorldPosition,
 } from '@utilities/BlockUtilities';
 import { interfaceStore, useInterfaceStore } from '@utilities/InterfaceStore';
-import { intersectionWorldPosition } from '@utilities/InterfaceUtilities';
+import { intersectionWorldPosition, isWorldPositionWithinBounds } from '@utilities/InterfaceUtilities';
 import { roundedVector3 } from '@utilities/MathUtilities';
 
 const InterfaceManager = () => {
@@ -37,6 +37,7 @@ const InterfaceManager = () => {
     if (intersection && !isPointerDragging && intersection.face) {
       const normal = intersection.face.normal.clone().multiplyScalar(blockSize);
       const worldPosition = intersectionWorldPosition(intersection);
+      console.log('🚀 ~ file: InterfaceManager.tsx ~ line 40 ~ handlePointerUp ~ worldPosition', worldPosition);
 
       if (button === 2) {
         const clusterOrigin = clusterOriginFromWorldPosition(worldPosition);
@@ -45,26 +46,30 @@ const InterfaceManager = () => {
 
         if (clusterIndex > -1) {
           removeBlock(type, clusterIndex, localPosition);
-          neighbourClustersForWordPosition(worldPosition).forEach((clusterIndex) => {
+          neighbourClustersForWorldPosition(worldPosition).forEach((clusterIndex) => {
             addClusterNeedUpdate(clusterIndex);
           });
         }
       } else {
         worldPosition.add(normal);
+        console.log('🚀 ~ file: InterfaceManager.tsx ~ line 55 ~ handlePointerUp ~ worldPosition', worldPosition);
 
-        if (worldPosition.y > -2) {
+        if (isWorldPositionWithinBounds(worldPosition)) {
           const clusterOrigin = clusterOriginFromWorldPosition(worldPosition);
+          console.log('🚀 ~ file: InterfaceManager.tsx ~ line 57 ~ handlePointerUp ~ clusterOrigin', clusterOrigin);
           const clusterIndex = clusterIndexFromOrigin(type, clusterOrigin);
+          console.log('🚀 ~ file: InterfaceManager.tsx ~ line 58 ~ handlePointerUp ~ clusterIndex', clusterIndex);
           const localPosition = roundedVector3(worldPosition.clone().sub(clusterOrigin), 1e-6);
+          console.log('🚀 ~ file: InterfaceManager.tsx ~ line 59 ~ handlePointerUp ~ localPosition', localPosition);
 
           if (clusterIndex > -1) {
             addBlock(type, clusterIndex, localPosition);
-            neighbourClustersForWordPosition(worldPosition).forEach((clusterIndex) => {
+            neighbourClustersForWorldPosition(worldPosition).forEach((clusterIndex) => {
               addClusterNeedUpdate(clusterIndex);
             });
           } else {
             addClusterWithBlock(type, clusterOrigin, localPosition);
-            neighbourClustersForWordPosition(worldPosition).forEach((clusterIndex) => {
+            neighbourClustersForWorldPosition(worldPosition).forEach((clusterIndex) => {
               addClusterNeedUpdate(clusterIndex);
             });
           }

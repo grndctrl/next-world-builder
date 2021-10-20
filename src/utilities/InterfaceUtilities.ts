@@ -4,16 +4,17 @@ import { blockStore } from '@utilities/BlockStore';
 
 function intersectionWorldPosition(intersection: THREE.Intersection): THREE.Vector3 {
   const blockSize = blockStore.getState().blockSize;
+  const clusterSize = blockStore.getState().clusterSize;
   let worldPosition: THREE.Vector3 = new THREE.Vector3();
 
   const matrix = new THREE.Matrix4();
 
   if (intersection.object.name === 'groundPlane') {
-    worldPosition.set(
-      Math.floor(intersection.point.x) + 0.5 * blockSize,
-      -2.5,
-      Math.floor(intersection.point.z) + 0.5 * blockSize
-    );
+    const x = Math.floor(intersection.point.x / blockSize) * blockSize + 0.5 * blockSize;
+    const y = clusterSize * -0.5 - blockSize * 0.5;
+    const z = Math.floor(intersection.point.z / blockSize) * blockSize + 0.5 * blockSize;
+
+    worldPosition.set(x, y, z);
   } else if (intersection.object.name === 'blockColliders' && intersection.instanceId !== undefined) {
     const mesh = intersection.object as THREE.InstancedMesh;
     mesh.getMatrixAt(intersection.instanceId, matrix);
@@ -23,4 +24,18 @@ function intersectionWorldPosition(intersection: THREE.Intersection): THREE.Vect
   return worldPosition;
 }
 
-export { intersectionWorldPosition };
+function isWorldPositionWithinBounds(position: THREE.Vector3): boolean {
+  if (
+    position.x < -16 ||
+    position.x > 16 ||
+    position.z < -16 ||
+    position.z > 16 ||
+    position.y < -4 ||
+    position.y > 27
+  ) {
+    return false;
+  }
+  return true;
+}
+
+export { intersectionWorldPosition, isWorldPositionWithinBounds };

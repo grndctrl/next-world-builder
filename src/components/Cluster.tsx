@@ -35,17 +35,17 @@ const Cluster = ({ cluster, geometry, material }: ClusterProps) => {
   const blockCollidersRef = useRef<THREE.InstancedMesh | null>(null);
   const clusterColliderRef = useRef<THREE.Mesh | null>(null);
 
-  const { clusterSize, blockSize, setClusterRef } = useBlockStore();
+  const { clusterSize, blocksPerClusterAxis, blockSize, setClusterRef } = useBlockStore();
   const instances: THREE.Object3D[] = [];
 
-  for (let z = 0; z < clusterSize; z++) {
-    for (let y = 0; y < clusterSize; y++) {
-      for (let x = 0; x < clusterSize; x++) {
-        const index = x + y * clusterSize + z * clusterSize * clusterSize;
+  for (let z = 0; z < blocksPerClusterAxis; z++) {
+    for (let y = 0; y < blocksPerClusterAxis; y++) {
+      for (let x = 0; x < blocksPerClusterAxis; x++) {
+        const index = x + y * blocksPerClusterAxis + z * blocksPerClusterAxis * blocksPerClusterAxis;
         if (cluster.blocks[index]) {
           const position = new THREE.Vector3(x, y, z);
 
-          position.subScalar((clusterSize - 1) * 0.5);
+          position.subScalar((blocksPerClusterAxis - 1) * 0.5);
           position.multiplyScalar(blockSize);
           position.add(cluster.origin);
 
@@ -70,6 +70,8 @@ const Cluster = ({ cluster, geometry, material }: ClusterProps) => {
   }
 
   useEffect(() => {
+    console.log('🚀 ~ file: Cluster.tsx ~ line 74 ~ useEffect ~ cluster.origin', cluster.origin);
+
     setClusterRef({
       index: cluster.index,
       origin: cluster.origin,
@@ -112,17 +114,25 @@ const Cluster = ({ cluster, geometry, material }: ClusterProps) => {
         ref={clusterColliderRef}
         position={cluster.origin}
         geometry={new THREE.BoxBufferGeometry(clusterSize, clusterSize, clusterSize)}
-      />
+      >
+        <meshBasicMaterial color={'#4488ff'} wireframe={true} />
+      </mesh>
       <instancedMesh
         visible={false}
         name="blockColliders"
         ref={blockCollidersRef}
-        args={[new THREE.BoxBufferGeometry(1, 1, 1), undefined, instances.length]}
-      />
+        args={[new THREE.BoxBufferGeometry(blockSize, blockSize, blockSize), undefined, instances.length]}
+      >
+        <meshBasicMaterial color={'#44ff88'} wireframe={true} />
+      </instancedMesh>
       <instancedMesh
         castShadow
         name="blockShadows"
-        args={[new THREE.BoxBufferGeometry(1, 1, 1), undefined, instances.length]}
+        args={[
+          new THREE.BoxBufferGeometry(blockSize - 0.1 * blockSize, blockSize, blockSize - 0.1 * blockSize),
+          undefined,
+          instances.length,
+        ]}
       >
         <shadowMaterial />
       </instancedMesh>

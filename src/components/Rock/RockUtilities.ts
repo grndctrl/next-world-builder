@@ -28,17 +28,17 @@ function pushTopSegment(geometry: THREE.BufferGeometry, blockSize: number, segme
 }
 
 function generateRockCluster(cluster: ClusterType): THREE.BufferGeometry | null {
-  const { clusterSize, blockSize } = blockStore.getState();
+  const { clusterSize, blocksPerClusterAxis, blockSize } = blockStore.getState();
   const blocks: THREE.BufferGeometry[] = [];
 
-  for (let z = 0; z < clusterSize; z++) {
-    for (let y = 0; y < clusterSize; y++) {
-      for (let x = 0; x < clusterSize; x++) {
-        const index = x + y * clusterSize + z * clusterSize * clusterSize;
+  for (let z = 0; z < blocksPerClusterAxis; z++) {
+    for (let y = 0; y < blocksPerClusterAxis; y++) {
+      for (let x = 0; x < blocksPerClusterAxis; x++) {
+        const index = x + y * blocksPerClusterAxis + z * blocksPerClusterAxis * blocksPerClusterAxis;
 
         if (cluster.blocks[index]) {
           const localPosition = new THREE.Vector3(x, y, z);
-          localPosition.subScalar((clusterSize - 1) * 0.5);
+          localPosition.subScalar((blocksPerClusterAxis - 1) * 0.5);
           localPosition.multiplyScalar(blockSize);
 
           const object = new THREE.Object3D();
@@ -54,19 +54,19 @@ function generateRockCluster(cluster: ClusterType): THREE.BufferGeometry | null 
             // TODO: this needs its own function
             if (!neighbours[11]) {
               if (!neighbours[8] && !neighbours[10]) {
-                block = deform(block, blockSize, 4, new THREE.Vector3(-1, 0, 0), neighbours);
+                block = deform(block, blockSize, 4, new THREE.Vector3(-1, 0, 0), neighbours, worldPosition);
               }
 
               if (!neighbours[9] && !neighbours[12]) {
-                block = deform(block, blockSize, 4, new THREE.Vector3(1, 0, 0), neighbours);
+                block = deform(block, blockSize, 4, new THREE.Vector3(1, 0, 0), neighbours, worldPosition);
               }
 
               if (!neighbours[2] && !neighbours[4]) {
-                block = deform(block, blockSize, 4, new THREE.Vector3(0, 0, -1), neighbours);
+                block = deform(block, blockSize, 4, new THREE.Vector3(0, 0, -1), neighbours, worldPosition);
               }
 
               if (!neighbours[15] && !neighbours[17]) {
-                block = deform(block, blockSize, 4, new THREE.Vector3(0, 0, 1), neighbours);
+                block = deform(block, blockSize, 4, new THREE.Vector3(0, 0, 1), neighbours, worldPosition);
               }
             }
             block.applyMatrix4(object.matrix);
@@ -204,7 +204,8 @@ function deform(
   size: number,
   segments: number,
   side: THREE.Vector3,
-  neighbours: boolean[]
+  neighbours: boolean[],
+  blockWorldPosition: THREE.Vector3
 ): THREE.BufferGeometry {
   geometry = geometry.clone();
   side = side.clone();
@@ -212,15 +213,16 @@ function deform(
   const direction = side.clone().multiplyScalar(-1);
   const half = size * 0.5;
   const segment = size / segments;
+  console.log('🚀 ~ file: RockUtilities.ts ~ line 215 ~ segment', segment);
   const halfSegment = segment * 0.5;
+  const quarterSegment = segment * 0.25;
 
   const indicesTopRow = GeometryUtilities.positionIndicesOnSideAtY(geometry, size, side, half);
-  const indicesSegmentRow = GeometryUtilities.positionIndicesOnSideAtY(geometry, size, side, half - halfSegment);
+  const indicesSegmentRow = GeometryUtilities.positionIndicesOnSideAtY(geometry, size, side, half - segment);
+  console.log('🚀 ~ file: RockUtilities.ts ~ line 220 ~ indicesSegmentRow', indicesSegmentRow);
   const indicesCenterRow = GeometryUtilities.positionIndicesOnSideAtY(geometry, size, side, 0);
 
   let currentPosition: THREE.Vector3 = new THREE.Vector3();
-  let indices = [...indicesTopRow];
-  console.log('🚀 ~ file: RockUtilities.ts ~ line 223 ~ indices', indices);
 
   const neighboursFilter = (index: number): boolean => {
     currentPosition = new THREE.Vector3(
@@ -231,38 +233,30 @@ function deform(
 
     if (side.x === -1) {
       if (neighbours[2] && (neighbours[1] || neighbours[4]) && currentPosition.z === -half) {
-        console.log('tick');
         return false;
       }
       if (neighbours[15] && (neighbours[14] || neighbours[17]) && currentPosition.z === half) {
-        console.log('tick');
         return false;
       }
     } else if (side.x === 1) {
       if (neighbours[2] && (neighbours[3] || neighbours[4]) && currentPosition.z === -half) {
-        console.log('tick');
         return false;
       }
       if (neighbours[15] && (neighbours[16] || neighbours[17]) && currentPosition.z === half) {
-        console.log('tick');
         return false;
       }
     } else if (side.z === -1) {
       if (neighbours[8] && (neighbours[1] || neighbours[10]) && currentPosition.x === -half) {
-        console.log('tick');
         return false;
       }
       if (neighbours[9] && (neighbours[3] || neighbours[12]) && currentPosition.x === half) {
-        console.log('tick');
         return false;
       }
     } else if (side.z === 1) {
       if (neighbours[8] && (neighbours[14] || neighbours[10]) && currentPosition.x === -half) {
-        console.log('tick');
         return false;
       }
       if (neighbours[9] && (neighbours[16] || neighbours[12]) && currentPosition.x === half) {
-        console.log('tick');
         return false;
       }
     }
@@ -270,10 +264,10 @@ function deform(
     return true;
   };
 
+  // Inset top rows inwards
+  let indices = [...indicesTopRow];
   indices = indices.filter((index) => neighboursFilter(index));
-  console.log('🚀 ~ file: RockUtilities.ts ~ line 225 ~ indices', indices);
-  // Inset top and second top rows inwards
-  const inset = direction.clone().multiplyScalar(halfSegment);
+  const inset = direction.clone().multiplyScalar(quarterSegment);
   indices.forEach((index) => {
     currentPosition = new THREE.Vector3(
       geometry.attributes.position.getX(index),
@@ -285,76 +279,71 @@ function deform(
     geometry.attributes.position.setXYZ(index, currentPosition.x, currentPosition.y, currentPosition.z);
   });
 
-  //
-
-  // // filter outer vertices
-  // indices = indices.filter((index) => {
-  //   currentPosition = new THREE.Vector3(
-  //     geometry.attributes.position.getX(index),
-  //     geometry.attributes.position.getY(index),
-  //     geometry.attributes.position.getZ(index)
-  //   );
-
-  //   if (side.z === 0 && currentPosition.z > -half && currentPosition.z < half) {
-  //     return true;
-  //   } else if (side.x === 0 && currentPosition.x > -half && currentPosition.x < half) {
-  //     return true;
-  //   }
-
-  //   return false;
-  // });
+  // offset second to top row up
+  indices = [...indicesSegmentRow];
+  console.log('🚀 ~ file: RockUtilities.ts ~ line 291 ~ indices', indices);
+  const offset = half - quarterSegment;
+  indices.forEach((index) => {
+    geometry.attributes.position.setY(index, offset);
+  });
 
   //
 
-  // //distort inner vertices on X/Z direction
-  // const simplexNoise = new SimplexNoise(Math.random().toString());
-  // indices.forEach((index) => {
-  //   currentPosition = new THREE.Vector3(
-  //     geometry.attributes.position.getX(index),
-  //     geometry.attributes.position.getY(index),
-  //     geometry.attributes.position.getZ(index)
-  //   );
+  //distort inner vertices on X/Z direction
+  indices = [...indicesTopRow];
+  indices = indices.filter((index) => neighboursFilter(index));
+  const simplexNoise = new SimplexNoise('seed');
+  indices.forEach((index) => {
+    currentPosition = new THREE.Vector3(
+      geometry.attributes.position.getX(index),
+      geometry.attributes.position.getY(index),
+      geometry.attributes.position.getZ(index)
+    );
 
-  //   const noise = simplexNoise.noise2(currentPosition.x, currentPosition.z) * 0.5;
-  //   const distortion = direction.clone().multiplyScalar(segment).multiplyScalar(noise);
-  //   currentPosition.add(distortion);
+    const noisePosition = currentPosition.clone().add(blockWorldPosition);
 
-  //   geometry.attributes.position.setXYZ(index, currentPosition.x, currentPosition.y, currentPosition.z);
-  // });
+    const noise = simplexNoise.noise2(noisePosition.x, noisePosition.z) * 0.5;
+    const distortion = direction.clone().multiplyScalar(segment).multiplyScalar(noise);
+    currentPosition.add(distortion);
+
+    geometry.attributes.position.setXYZ(index, currentPosition.x, currentPosition.y, currentPosition.z);
+  });
 
   //
 
   // //distort segment row vertices on Y
-  // difference(indices, indicesTopRow).forEach((index) => {
-  //   currentPosition = new THREE.Vector3(
-  //     geometry.attributes.position.getX(index),
-  //     geometry.attributes.position.getY(index),
-  //     geometry.attributes.position.getZ(index)
-  //   );
+  indices = [...indicesSegmentRow];
+  indices = indices.filter((index) => neighboursFilter(index));
+  indices.forEach((index) => {
+    currentPosition = new THREE.Vector3(
+      geometry.attributes.position.getX(index),
+      geometry.attributes.position.getY(index),
+      geometry.attributes.position.getZ(index)
+    );
 
-  //   const noise = simplexNoise.noise2(currentPosition.x, currentPosition.z) * 0.5 + 0.5;
-  //   const distortion = new THREE.Vector3(0, -1, 0).multiplyScalar(halfSegment).multiplyScalar(noise);
-  //   currentPosition.add(distortion);
+    const noise = simplexNoise.noise2(currentPosition.x, currentPosition.z) * 0.5 + 0.5;
+    const distortion = new THREE.Vector3(0, -1, 0).multiplyScalar(halfSegment).multiplyScalar(noise);
+    currentPosition.add(distortion);
 
-  //   geometry.attributes.position.setY(index, currentPosition.y);
-  // });
+    geometry.attributes.position.setY(index, currentPosition.y);
+  });
 
   //
 
   // //distort center row vertices on Y
-  // indicesCenterRow.forEach((index) => {
-  //   currentPosition = new THREE.Vector3(
-  //     geometry.attributes.position.getX(index),
-  //     geometry.attributes.position.getY(index),
-  //     geometry.attributes.position.getZ(index)
-  //   );
+  indicesCenterRow.forEach((index) => {
+    currentPosition = new THREE.Vector3(
+      geometry.attributes.position.getX(index),
+      geometry.attributes.position.getY(index),
+      geometry.attributes.position.getZ(index)
+    );
 
-  //   const noise = simplexNoise.noise2(currentPosition.x, currentPosition.z) * 0.5 + 0.5;
-  //   const distortion = new THREE.Vector3(0, -1, 0).multiplyScalar(halfSegment).multiplyScalar(noise);
-  //   currentPosition.add(distortion);
+    const noise = simplexNoise.noise2(currentPosition.x, currentPosition.z) * 0.5 + 0.5;
+    const distortion = new THREE.Vector3(0, -1, 0).multiplyScalar(halfSegment).multiplyScalar(noise);
+    currentPosition.add(distortion);
 
-  //   geometry.attributes.position.setY(index, currentPosition.y);
-  // });
+    geometry.attributes.position.setY(index, currentPosition.y);
+  });
 
   //
 

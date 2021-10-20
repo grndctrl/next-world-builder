@@ -8,9 +8,11 @@ import { GroundPlaneRef } from '@components/GroundPlane';
 import { indexFromLocalPosition } from '@utilities/BlockUtilities';
 
 interface BlockStore extends State {
-  clusterSize: number;
+  blocksPerClusterAxis: number;
 
   blockSize: number;
+
+  clusterSize: number;
 
   //
 
@@ -48,14 +50,19 @@ interface BlockStore extends State {
   setGroundPlaneRef: (ref: GroundPlaneRef) => void;
 }
 
-const clusterSize = 4;
-const blockSize = 1;
-const initialBlocks = Array.from({ length: clusterSize * clusterSize * clusterSize }).map((block) => true);
+const blocksPerClusterAxis = 4;
+const blockSize = 2;
+const clusterSize = blocksPerClusterAxis * blockSize;
+const initialBlocks = Array.from({ length: blocksPerClusterAxis * blocksPerClusterAxis * blocksPerClusterAxis }).map(
+  (block) => true
+);
 
 const state: StateCreator<BlockStore> = (set, get) => ({
-  clusterSize: clusterSize,
+  blocksPerClusterAxis: blocksPerClusterAxis,
 
   blockSize: blockSize,
+
+  clusterSize: clusterSize,
 
   //
 
@@ -157,7 +164,9 @@ const state: StateCreator<BlockStore> = (set, get) => ({
     const allClusters = get().getAllClusters();
     const clusterIndex = allClusters.length;
 
-    const blocks = Array.from({ length: clusterSize * clusterSize * clusterSize }).map((block) => false);
+    const blocks = Array.from({ length: blocksPerClusterAxis * blocksPerClusterAxis * blocksPerClusterAxis }).map(
+      (block) => false
+    );
     const index = indexFromLocalPosition(localPosition);
     blocks[index] = true;
 
