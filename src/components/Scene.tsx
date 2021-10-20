@@ -54,10 +54,11 @@ const Scene = () => {
       <hemisphereLight color={new THREE.Color('#ffddaa')} groundColor={new THREE.Color('#8888ee')} intensity={0.5} />
       <directionalLight
         ref={light}
-        color={'#ffffaa'}
-        intensity={1.5}
+        color={'#ffeebb'}
+        intensity={1.0}
         position={[-2, 10, 3]}
         castShadow
+        shadow-bias={0.001}
         shadow-mapSize-width={4096}
         shadow-mapSize-height={4096}
         shadow-camera-near={1}

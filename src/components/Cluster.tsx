@@ -102,16 +102,27 @@ const Cluster = ({ cluster, geometry, material }: ClusterProps) => {
       <mesh castShadow receiveShadow ref={meshRef} position={cluster.origin} geometry={geometry} material={material} />
       <mesh
         visible={false}
+        position={cluster.origin}
+        geometry={geometry}
+        material={new THREE.MeshBasicMaterial({ color: 'black', wireframe: true })}
+      />
+      <mesh
+        visible={false}
         name="clusterCollider"
         ref={clusterColliderRef}
         position={cluster.origin}
         geometry={new THREE.BoxBufferGeometry(clusterSize, clusterSize, clusterSize)}
       />
       <instancedMesh
-        castShadow
+        visible={false}
         name="blockColliders"
         ref={blockCollidersRef}
-        args={[new THREE.BoxBufferGeometry(1 - 0.1, 1, 1 - 0.1), undefined, instances.length]}
+        args={[new THREE.BoxBufferGeometry(1, 1, 1), undefined, instances.length]}
+      />
+      <instancedMesh
+        castShadow
+        name="blockShadows"
+        args={[new THREE.BoxBufferGeometry(1, 1, 1), undefined, instances.length]}
       >
         <shadowMaterial />
       </instancedMesh>
