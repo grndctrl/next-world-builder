@@ -11,6 +11,8 @@ import {
 import * as GeometryUtilities from '@utilities/GeometryUtilities';
 import SimplexNoise from '@utilities/SimplexNoise';
 
+import { blockStore } from './BlockStore';
+
 /**
  * @param {THREE.BufferGeometry} geometry
  * @return {*}  {THREE.BufferGeometry}
@@ -126,4 +128,17 @@ function tesselate(geometry: THREE.BufferGeometry): THREE.BufferGeometry {
   return modifiedGeometry;
 }
 
-export { convex, jitter, planeCut, smooth, edgeSplit, simplify, tesselate };
+function pushBottomFace(geometry: THREE.BufferGeometry): THREE.BufferGeometry {
+  const { blockSize } = blockStore.getState();
+  let modifiedGeometry = geometry.clone();
+  const { position } = modifiedGeometry.attributes;
+
+  const indices = GeometryUtilities.positionIndicesAtY(position as THREE.BufferAttribute, blockSize * -0.5);
+  indices.forEach((index) => {
+    position.setY(index, -64);
+  });
+
+  return modifiedGeometry;
+}
+
+export { convex, jitter, planeCut, smooth, edgeSplit, simplify, tesselate, pushBottomFace };

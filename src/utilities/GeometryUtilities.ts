@@ -177,8 +177,9 @@ function positionIndicesOnSideAtY(
  * @param {THREE.Vector3} position
  * @return {*}  {number[]}
  */
-function positionIndicesAtPosition(positionAttribute: THREE.BufferAttribute, position: THREE.Vector3): number[] {
+function positionIndicesAtPosition(geometry: THREE.BufferGeometry, position: THREE.Vector3): number[] {
   const indices: number[] = [];
+  const positionAttribute = geometry.attributes.position;
 
   for (let i = 0; i < positionAttribute.count; i++) {
     const currentPosition = new THREE.Vector3(

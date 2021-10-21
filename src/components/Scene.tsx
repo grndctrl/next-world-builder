@@ -43,20 +43,26 @@ const Scene = () => {
       <Stats />
       <OrthographicCamera makeDefault position={[16, 16, 16]} near={0.1} far={128} zoom={0.25} />
 
-      {/* <MapControls
+      <MapControls
         enableRotate={true}
         maxPolarAngle={Math.PI / 3}
         minPolarAngle={Math.PI / 3}
         maxZoom={2}
         minZoom={0.25}
-      /> */}
-      <OrbitControls maxPolarAngle={Math.PI / 2.5} minPolarAngle={0} maxZoom={2} minZoom={0.25} />
+      />
+      {/* <OrbitControls maxPolarAngle={Math.PI / 2.5} minPolarAngle={0} maxZoom={2} minZoom={0.25} /> */}
+      {/* <OrbitControls maxZoom={2} minZoom={0.25} /> */}
 
-      <hemisphereLight color={new THREE.Color('#ffddaa')} groundColor={new THREE.Color('#8888ee')} intensity={0.5} />
+      <hemisphereLight
+        position={[-2, 10, 3]}
+        color={new THREE.Color('#f8a')}
+        groundColor={new THREE.Color('#248')}
+        intensity={0.75}
+      />
       <directionalLight
         ref={light}
-        color={'#ffeebb'}
-        intensity={1.0}
+        color={'#fdb'}
+        intensity={0.5}
         position={[-2, 10, 3]}
         castShadow
         shadow-bias={0.001}

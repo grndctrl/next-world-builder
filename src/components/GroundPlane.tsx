@@ -20,7 +20,7 @@ const GroundPlane = () => {
   return (
     <Plane
       ref={planeCollider}
-      visible={true}
+      visible={false}
       name={'groundPlane'}
       args={[32, 32, 32 / blockSize, 32 / blockSize]}
       rotation={[Math.PI * -0.5, 0, 0]}

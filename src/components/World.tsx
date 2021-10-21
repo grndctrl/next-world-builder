@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import * as THREE from 'three';
 
 import Cluster, { ClusterType } from '@components/Cluster';
@@ -53,7 +53,13 @@ const World = () => {
             const updatedCluster = {
               cluster: clusterByIndex,
               geometry: geometry,
-              material: new THREE.MeshStandardMaterial({ color: '#ff8844', wireframe: false }),
+              material: new THREE.MeshPhysicalMaterial({
+                color: '#445',
+                metalness: 0,
+                roughness: 1,
+                reflectivity: 0,
+                vertexColors: false,
+              }),
             };
 
             setClusters((clusters) => {
@@ -101,4 +107,4 @@ const World = () => {
   );
 };
 
-export default World;
+export default memo(World);

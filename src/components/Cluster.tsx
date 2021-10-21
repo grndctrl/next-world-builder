@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
 import { useFrame } from '@react-three/fiber';
@@ -140,4 +140,4 @@ const Cluster = ({ cluster, geometry, material }: ClusterProps) => {
   );
 };
 
-export default Cluster;
+export default memo(Cluster);

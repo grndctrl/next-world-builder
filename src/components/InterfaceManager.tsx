@@ -58,6 +58,7 @@ const InterfaceManager = () => {
           const localPosition = roundedVector3(worldPosition.clone().sub(clusterOrigin), 1e-6);
 
           if (clusterIndex > -1) {
+            console.log('worldPosition', worldPosition);
             addBlock(type, clusterIndex, localPosition);
             neighbourClustersForWorldPosition(worldPosition).forEach((clusterIndex) => {
               addClusterNeedUpdate(clusterIndex);

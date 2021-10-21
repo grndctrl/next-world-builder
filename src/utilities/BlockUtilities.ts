@@ -39,6 +39,13 @@ function clusterIndexFromOrigin(type: Material, clusterOrigin: THREE.Vector3): n
   return clusterIndex;
 }
 
+function isBlockAtBottom(worldPosition: THREE.Vector3) {
+  const { blockSize, clusterSize } = blockStore.getState();
+  const bottom = clusterSize * -0.5 + blockSize * 0.5;
+
+  return worldPosition.y === bottom;
+}
+
 function indexFromLocalPosition(localPosition: THREE.Vector3): number {
   const { blockSize, clusterSize, blocksPerClusterAxis } = blockStore.getState();
   const offset = blocksPerClusterAxis * 0.5 - 0.5;
@@ -176,4 +183,5 @@ export {
   neighbourPositionsForWorldPosition,
   neighboursForWorldPosition,
   neighboursFromHash,
+  isBlockAtBottom,
 };
