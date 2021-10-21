@@ -35,6 +35,10 @@ const World = () => {
     setClustersNeedUpdate([0]);
   }, []);
 
+  useEffect(() => {
+    console.log('clusters hook update');
+  }, [clusters]);
+
   // TODO: instead of rerendering complete material. Rerender specific block.
   useEffect(() => {
     // find clusters to update

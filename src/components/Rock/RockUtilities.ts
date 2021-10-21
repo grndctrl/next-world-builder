@@ -213,13 +213,11 @@ function deform(
   const direction = side.clone().multiplyScalar(-1);
   const half = size * 0.5;
   const segment = size / segments;
-  console.log('🚀 ~ file: RockUtilities.ts ~ line 215 ~ segment', segment);
   const halfSegment = segment * 0.5;
   const quarterSegment = segment * 0.25;
 
   const indicesTopRow = GeometryUtilities.positionIndicesOnSideAtY(geometry, size, side, half);
   const indicesSegmentRow = GeometryUtilities.positionIndicesOnSideAtY(geometry, size, side, half - segment);
-  console.log('🚀 ~ file: RockUtilities.ts ~ line 220 ~ indicesSegmentRow', indicesSegmentRow);
   const indicesCenterRow = GeometryUtilities.positionIndicesOnSideAtY(geometry, size, side, 0);
 
   let currentPosition: THREE.Vector3 = new THREE.Vector3();
@@ -281,7 +279,6 @@ function deform(
 
   // offset second to top row up
   indices = [...indicesSegmentRow];
-  console.log('🚀 ~ file: RockUtilities.ts ~ line 291 ~ indices', indices);
   const offset = half - quarterSegment;
   indices.forEach((index) => {
     geometry.attributes.position.setY(index, offset);
@@ -300,11 +297,10 @@ function deform(
       geometry.attributes.position.getZ(index)
     );
 
-    // TODO: Still glitches around the sides (between top / segment row)
     const noisePosition = currentPosition.clone().add(blockWorldPosition).multiplyScalar(0.5);
-
-    const noise = simplexNoise.noise2(noisePosition.x, noisePosition.z) * 0.5;
-    const distortion = direction.clone().multiplyScalar(segment).multiplyScalar(noise);
+    // const noise = simplexNoise.noise3(noisePosition.x, noisePosition.y, noisePosition.z) * 0.5 + 0.5;
+    const noise = simplexNoise.noise2(noisePosition.x, noisePosition.z) * 0.5 + 0.5;
+    const distortion = direction.clone().multiplyScalar(halfSegment).multiplyScalar(noise);
     currentPosition.add(distortion);
 
     geometry.attributes.position.setXYZ(index, currentPosition.x, currentPosition.y, currentPosition.z);
@@ -322,7 +318,9 @@ function deform(
       geometry.attributes.position.getZ(index)
     );
 
-    const noise = simplexNoise.noise2(currentPosition.x, currentPosition.z) * 0.5 + 0.5;
+    const noisePosition = currentPosition.clone().add(blockWorldPosition).multiplyScalar(0.5);
+    // const noise = simplexNoise.noise3(noisePosition.x, noisePosition.y, noisePosition.z) * 0.5 + 0.5;
+    const noise = simplexNoise.noise2(noisePosition.x, noisePosition.z) * 0.5 + 0.5;
     const distortion = new THREE.Vector3(0, -1, 0).multiplyScalar(halfSegment).multiplyScalar(noise);
     currentPosition.add(distortion);
 
@@ -339,7 +337,9 @@ function deform(
       geometry.attributes.position.getZ(index)
     );
 
-    const noise = simplexNoise.noise2(currentPosition.x, currentPosition.z) * 0.5 + 0.5;
+    const noisePosition = currentPosition.clone().add(blockWorldPosition).multiplyScalar(0.5);
+    // const noise = simplexNoise.noise3(noisePosition.x, noisePosition.y, noisePosition.z) * 0.5 + 0.5;
+    const noise = simplexNoise.noise2(noisePosition.x, noisePosition.z) * 0.5 + 0.5;
     const distortion = new THREE.Vector3(0, -1, 0).multiplyScalar(halfSegment).multiplyScalar(noise);
     currentPosition.add(distortion);
 

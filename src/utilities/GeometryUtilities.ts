@@ -147,8 +147,6 @@ function positionIndicesOnSideAtY(
   const half = size * 0.5;
   side = side.clone().multiplyScalar(half);
 
-  console.log('150, y', y);
-
   const indices: number[] = [];
 
   for (let i = 0; i < positionAttribute.count; i++) {
