@@ -58,7 +58,7 @@ function generateRockCluster(cluster: ClusterType): THREE.BufferGeometry | null 
             // TODO: this needs its own function
             if (!neighbours[11]) {
               const { position, color } = block.attributes;
-              const grass = new THREE.Color('#8f4');
+              const grass = new THREE.Color('#4f5566');
               const indices = GeometryUtilities.positionIndicesAtY(position as THREE.BufferAttribute, blockSize * 0.5);
               indices.forEach((index) => {
                 color.setXYZ(index, grass.r, grass.g, grass.b);
