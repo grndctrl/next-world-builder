@@ -75,9 +75,29 @@ const World = () => {
 
             setClustersNeedUpdate(clustersNeedUpdate.splice(1));
           },
-          (e) => {
+          () => {
             // Rejected, no blocks left
-            console.log(e);
+            const updatedCluster: ClusterState = {
+              cluster: clusterByIndex,
+              geometry: new THREE.BufferGeometry(),
+              material: RockMaterial,
+              // material: new THREE.MeshPhysicalMaterial({
+              //   color: '#678',
+              //   metalness: 0,
+              //   roughness: 1,
+              //   reflectivity: 0,
+              //   vertexColors: true,
+              // }),
+            };
+
+            setClusters((clusters) => {
+              const clone = clusters.slice();
+              clone[index] = updatedCluster;
+
+              return clone;
+            });
+
+            setClustersNeedUpdate(clustersNeedUpdate.splice(1));
           }
         );
       }
@@ -98,4 +118,4 @@ const World = () => {
   );
 };
 
-export default memo(World);
+export default World;

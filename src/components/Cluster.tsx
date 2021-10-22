@@ -142,4 +142,4 @@ const Cluster = ({ cluster, geometry, material }: ClusterProps) => {
   );
 };
 
-export default memo(Cluster);
+export default Cluster;
