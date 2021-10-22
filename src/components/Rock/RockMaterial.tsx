@@ -22,6 +22,7 @@ const RockMaterial: React.FC = () => {
        // @ts-ignore */
     <Material
       // 1️⃣ declare uniforms with the correct type
+      vertexColors={true}
       uniforms={{
         fogPlane: { value: fogPlane, type: 'vec4' },
         fogPlaneDepth: { value: fogDepth, type: 'float' },
