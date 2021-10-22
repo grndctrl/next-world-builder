@@ -40,7 +40,7 @@ const Scene = () => {
 
   return (
     <>
-      <Stats />
+      {/* <Stats /> */}
       <OrthographicCamera makeDefault position={[16, 16, 16]} near={0.1} far={128} zoom={0.25} />
 
       <MapControls

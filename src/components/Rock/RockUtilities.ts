@@ -48,7 +48,7 @@ function generateRockCluster(cluster: ClusterType): THREE.BufferGeometry | null 
           const worldPosition = localPosition.clone().add(cluster.origin);
           const neighbours = neighboursForWorldPosition(worldPosition);
 
-          let block = GeometryGenerators.generateBlockSides(blockSize, 8, neighbours);
+          let block = GeometryGenerators.generateBlockSides(blockSize, 8, neighbours, new THREE.Color('#345'));
 
           if (block) {
             if (isBlockAtBottom(worldPosition)) {
@@ -77,6 +77,7 @@ function generateRockCluster(cluster: ClusterType): THREE.BufferGeometry | null 
                 block = deform(block, blockSize, 4, new THREE.Vector3(0, 0, 1), neighbours, worldPosition);
               }
             }
+
             block.applyMatrix4(object.matrix);
             blocks.push(block);
           }
@@ -87,6 +88,7 @@ function generateRockCluster(cluster: ClusterType): THREE.BufferGeometry | null 
 
   if (blocks.length > 0) {
     let geometry = mergeBufferGeometries(blocks, false);
+    console.log('🚀 ~ file: RockUtilities.ts ~ line 91 ~ generateRockCluster ~ geometry', geometry);
 
     if (geometry) {
       geometry = GeometryModifiers.smooth(geometry);

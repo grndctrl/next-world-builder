@@ -27,7 +27,7 @@ export interface ClusterRef {
 interface ClusterProps {
   cluster: ClusterType;
   geometry: THREE.BufferGeometry;
-  material: THREE.Material;
+  material: React.FC;
 }
 
 const Cluster = ({ cluster, geometry, material }: ClusterProps) => {
@@ -101,7 +101,9 @@ const Cluster = ({ cluster, geometry, material }: ClusterProps) => {
   return (
     <group>
       <axesHelper />
-      <mesh castShadow receiveShadow ref={meshRef} position={cluster.origin} geometry={geometry} material={material} />
+      <mesh castShadow receiveShadow ref={meshRef} position={cluster.origin} geometry={geometry}>
+        {material({})}
+      </mesh>
       <mesh
         visible={false}
         position={cluster.origin}

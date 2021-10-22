@@ -5,6 +5,8 @@ import Cluster, { ClusterType } from '@components/Cluster';
 import { generateRockCluster } from '@components/Rock/RockUtilities';
 import { useBlockStore } from '@utilities/BlockStore';
 
+import RockMaterial from './Rock/RockMaterial';
+
 const generateClusterGeometry = (cluster: ClusterType): Promise<THREE.BufferGeometry> => {
   return new Promise((resolve, reject) => {
     const geometry = generateRockCluster(cluster);
@@ -21,7 +23,8 @@ const World = () => {
   interface ClusterState {
     cluster: ClusterType;
     geometry: THREE.BufferGeometry;
-    material: THREE.Material;
+    material: React.FC;
+    // material: THREE.Material;
   }
 
   const clustersNeedUpdate = useBlockStore((state) => state.clustersNeedUpdate);
@@ -50,16 +53,17 @@ const World = () => {
         generateClusterGeometry(clusterByIndex).then(
           (geometry) => {
             // Resolved with blocks geometry
-            const updatedCluster = {
+            const updatedCluster: ClusterState = {
               cluster: clusterByIndex,
               geometry: geometry,
-              material: new THREE.MeshPhysicalMaterial({
-                color: '#445',
-                metalness: 0,
-                roughness: 1,
-                reflectivity: 0,
-                vertexColors: false,
-              }),
+              material: RockMaterial,
+              // material: new THREE.MeshPhysicalMaterial({
+              //   color: '#678',
+              //   metalness: 0,
+              //   roughness: 1,
+              //   reflectivity: 0,
+              //   vertexColors: true,
+              // }),
             };
 
             setClusters((clusters) => {
@@ -71,22 +75,9 @@ const World = () => {
 
             setClustersNeedUpdate(clustersNeedUpdate.splice(1));
           },
-          () => {
+          (e) => {
             // Rejected, no blocks left
-            const updatedCluster = {
-              cluster: clusterByIndex,
-              geometry: new THREE.BufferGeometry(),
-              material: new THREE.MeshNormalMaterial(),
-            };
-
-            setClusters((clusters) => {
-              const clone = clusters.slice();
-              clone[index] = updatedCluster;
-
-              return clone;
-            });
-
-            setClustersNeedUpdate(clustersNeedUpdate.splice(1));
+            console.log(e);
           }
         );
       }
