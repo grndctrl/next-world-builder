@@ -6,16 +6,18 @@ import PointerIndicator from '@components/PointerIndicator';
 import { useFrame } from '@react-three/fiber';
 import { useBlockStore } from '@utilities/BlockStore';
 import {
-  clusterIndexFromOrigin,
+  clusterTypeIndexFromOrigin,
   clusterOriginFromWorldPosition,
   neighbourClustersForWorldPosition,
+  clustersAtOrigin,
 } from '@utilities/BlockUtilities';
 import { interfaceStore, useInterfaceStore } from '@utilities/InterfaceStore';
 import { intersectionWorldPosition, isWorldPositionWithinBounds } from '@utilities/InterfaceUtilities';
 import { roundedVector3 } from '@utilities/MathUtilities';
+import { Material } from './Cluster';
 
 const InterfaceManager = () => {
-  const { intersection, setIntersection } = useInterfaceStore();
+  const { intersection, setIntersection, setMaterial } = useInterfaceStore();
   const { blockSize, clusterRefs, groundPlaneRef, addBlock, removeBlock, addClusterWithBlock, addClusterNeedUpdate } =
     useBlockStore();
 
@@ -23,6 +25,7 @@ const InterfaceManager = () => {
 
   useEffect(() => {
     window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('keyup', handleKeyUp);
 
     return () => {
       window.removeEventListener('pointerup', handlePointerUp);
@@ -30,7 +33,7 @@ const InterfaceManager = () => {
   }, []);
 
   const handlePointerUp = ({ button, preventDefault }: PointerEvent) => {
-    const type = 0;
+    const currentMaterial = interfaceStore.getState().currentMaterial;
     const isPointerDragging = interfaceStore.getState().isPointerDragging;
     const intersection = interfaceStore.getState().intersection;
 
@@ -38,15 +41,26 @@ const InterfaceManager = () => {
       const normal = intersection.face.normal.clone().multiplyScalar(blockSize);
       const worldPosition = intersectionWorldPosition(intersection);
 
-      if (button === 2) {
-        const clusterOrigin = clusterOriginFromWorldPosition(worldPosition);
-        const clusterIndex = clusterIndexFromOrigin(type, clusterOrigin);
-        const localPosition = roundedVector3(worldPosition.clone().sub(clusterOrigin), 1e-6);
+      // get block at worldposition
+      console.log('🚀 ~ file: InterfaceManager.tsx ~ line 42 ~ handlePointerUp ~ worldPosition', worldPosition);
 
-        if (clusterIndex > -1) {
-          removeBlock(type, clusterIndex, localPosition);
-          neighbourClustersForWorldPosition(worldPosition).forEach((clusterIndex) => {
-            addClusterNeedUpdate(clusterIndex);
+      if (button === 2) {
+        // right click: delete block
+        const clusterOrigin = clusterOriginFromWorldPosition(worldPosition);
+        const localPosition = roundedVector3(worldPosition.clone().sub(clusterOrigin), 1e-6);
+        const clusters = clustersAtOrigin(clusterOrigin);
+
+        // const clusterIndex = clusterTypeIndexFromOrigin(currentMaterial, clusterOrigin);
+        // if (clusterIndex > -1) {
+        //   removeBlock(currentMaterial, clusterIndex, localPosition);
+        //   neighbourClustersForWorldPosition(worldPosition).forEach((clusterIndex) => {
+        //     addClusterNeedUpdate(clusterIndex);
+        //   });
+        // }
+
+        if (clusters.length > 0) {
+          clusters.forEach((cluster) => {
+            removeBlock(cluster.type, cluster.index, localPosition);
           });
         }
       } else {
@@ -54,23 +68,32 @@ const InterfaceManager = () => {
 
         if (isWorldPositionWithinBounds(worldPosition)) {
           const clusterOrigin = clusterOriginFromWorldPosition(worldPosition);
-          const clusterIndex = clusterIndexFromOrigin(type, clusterOrigin);
+          const clusterIndex = clusterTypeIndexFromOrigin(currentMaterial, clusterOrigin);
+          console.log('🚀 ~ file: InterfaceManager.tsx ~ line 63 ~ handlePointerUp ~ clusterIndex', clusterIndex);
           const localPosition = roundedVector3(worldPosition.clone().sub(clusterOrigin), 1e-6);
 
           if (clusterIndex > -1) {
             console.log('worldPosition', worldPosition);
-            addBlock(type, clusterIndex, localPosition);
+            addBlock(currentMaterial, clusterIndex, localPosition);
             neighbourClustersForWorldPosition(worldPosition).forEach((clusterIndex) => {
               addClusterNeedUpdate(clusterIndex);
             });
           } else {
-            addClusterWithBlock(type, clusterOrigin, localPosition);
+            addClusterWithBlock(currentMaterial, clusterOrigin, localPosition);
             neighbourClustersForWorldPosition(worldPosition).forEach((clusterIndex) => {
               addClusterNeedUpdate(clusterIndex);
             });
           }
         }
       }
+    }
+  };
+
+  const handleKeyUp = ({ key }: KeyboardEvent) => {
+    if (key === '1') {
+      setMaterial(Material.ROCK);
+    } else if (key === '2') {
+      setMaterial(Material.BRICK);
     }
   };
 

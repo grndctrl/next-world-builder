@@ -4,7 +4,7 @@ import { mergeBufferGeometries, mergeVertices } from 'three-stdlib';
 
 import SimplexNoise from '@src/utilities/SimplexNoise';
 import { blockStore } from '@utilities/BlockStore';
-import { isBlockAtBottom, neighboursForWorldPosition } from '@utilities/BlockUtilities';
+import { isBlockAtBottom, typeNeighboursForWorldPosition } from '@utilities/BlockUtilities';
 import * as GeometryGenerators from '@utilities/GeometryGenerators';
 import * as GeometryModifiers from '@utilities/GeometryModifiers';
 import * as GeometryUtilities from '@utilities/GeometryUtilities';
@@ -46,7 +46,7 @@ function generateRockCluster(cluster: ClusterType): THREE.BufferGeometry | null 
           object.updateMatrix();
 
           const worldPosition = localPosition.clone().add(cluster.origin);
-          const neighbours = neighboursForWorldPosition(worldPosition);
+          const neighbours = typeNeighboursForWorldPosition(cluster.type, worldPosition);
 
           let block = GeometryGenerators.generateBlockSides(blockSize, 8, neighbours, new THREE.Color('#345'));
 

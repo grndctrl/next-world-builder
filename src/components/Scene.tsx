@@ -6,6 +6,7 @@ import InterfaceManager from '@components/InterfaceManager';
 import World from '@components/World';
 import { MapControls, OrbitControls, OrthographicCamera, Stats } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
+import Example from './Brick/Example';
 
 // softShadows();
 
@@ -78,6 +79,7 @@ const Scene = () => {
 
       <InterfaceManager />
       <World />
+      {/* <Example /> */}
       {/* <CornerExample /> */}
       {/* <FacesTest /> */}
       <GroundPlane />

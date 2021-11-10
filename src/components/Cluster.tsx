@@ -7,7 +7,7 @@ import { neighboursForWorldPosition } from '@utilities/BlockUtilities';
 
 export enum Material {
   ROCK,
-  DIRT,
+  BRICK,
 }
 
 export interface ClusterType {

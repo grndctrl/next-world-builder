@@ -11,6 +11,7 @@
   "dependencies": {
     "@react-three/drei": "^7.16.6",
     "@react-three/fiber": "^7.0.16",
+    "@react-three/postprocessing": "^2.0.5",
     "@types/lodash": "^4.14.175",
     "component-material": "^1.0.7",
     "lodash": "^4.17.21",

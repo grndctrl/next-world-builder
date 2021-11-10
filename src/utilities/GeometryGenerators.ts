@@ -20,8 +20,6 @@ function generateBlockSides(
 ): THREE.BufferGeometry | null {
   const sides = [];
 
-  // check each side, generate a face if there is no neighbour
-  // -X axis
   if (!neighbours[8]) {
     const plane = new THREE.PlaneBufferGeometry(blockSize, blockSize, 4, 4);
     plane.rotateY(Math.PI * -0.5);

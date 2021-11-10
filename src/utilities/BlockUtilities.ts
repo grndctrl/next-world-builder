@@ -1,7 +1,7 @@
 import { uniq } from 'lodash';
 import * as THREE from 'three';
 
-import { Material } from '@components/Cluster';
+import { ClusterType, Material } from '@components/Cluster';
 import { blockStore } from '@utilities/BlockStore';
 import { roundedVector3 } from '@utilities/MathUtilities';
 
@@ -25,14 +25,30 @@ function clusterOriginFromWorldPosition(worldPosition: THREE.Vector3): THREE.Vec
   return clusterOrigin;
 }
 
-function clusterIndexFromOrigin(type: Material, clusterOrigin: THREE.Vector3): number {
+function clustersAtOrigin(clusterOrigin: THREE.Vector3): ClusterType[] {
+  const rockClusters = blockStore.getState().clusters[Material.ROCK];
+  const brickClusters = blockStore.getState().clusters[Material.BRICK];
+  const clusters = [...rockClusters, ...brickClusters];
+
+  let clustersAtOrigin: ClusterType[] = [];
+
+  clusters.forEach((cluster) => {
+    if (cluster.origin.equals(clusterOrigin)) {
+      clustersAtOrigin.push(cluster);
+    }
+  });
+
+  return clustersAtOrigin;
+}
+
+function clusterTypeIndexFromOrigin(type: Material, clusterOrigin: THREE.Vector3): number {
   const clusters = blockStore.getState().clusters[type];
 
   let clusterIndex = -1;
 
   for (let i = 0; i < clusters.length; i++) {
     if (clusters[i].origin.equals(clusterOrigin)) {
-      clusterIndex = i;
+      clusterIndex = clusters[i].index;
     }
   }
 
@@ -60,6 +76,24 @@ function indexFromLocalPosition(localPosition: THREE.Vector3): number {
   return index;
 }
 
+function isTypeBlockAtWorldPosition(type: Material, worldPosition: THREE.Vector3): boolean {
+  const clusters = blockStore.getState().clusters;
+
+  const clusterOrigin = clusterOriginFromWorldPosition(worldPosition);
+  const localPosition = worldPosition.clone().sub(clusterOrigin);
+  const index = indexFromLocalPosition(localPosition);
+
+  let block = false;
+
+  clusters[type].forEach((cluster) => {
+    if (cluster.origin.equals(clusterOrigin)) {
+      block = block === false ? cluster.blocks[index] : true;
+    }
+  });
+
+  return block;
+}
+
 function isBlockAtWorldPosition(worldPosition: THREE.Vector3): boolean {
   const clusters = blockStore.getState().clusters;
   const allClusters = [];
@@ -69,7 +103,7 @@ function isBlockAtWorldPosition(worldPosition: THREE.Vector3): boolean {
   const index = indexFromLocalPosition(localPosition);
 
   allClusters.push(...clusters[Material.ROCK]);
-  allClusters.push(...clusters[Material.DIRT]);
+  allClusters.push(...clusters[Material.BRICK]);
 
   let block = false;
 
@@ -92,8 +126,8 @@ function neighbourClustersForWorldPosition(worldPosition: THREE.Vector3): number
 
       const indexes = [];
 
-      indexes.push(clusterIndexFromOrigin(Material.DIRT, origin));
-      indexes.push(clusterIndexFromOrigin(Material.ROCK, origin));
+      indexes.push(clusterTypeIndexFromOrigin(Material.BRICK, origin));
+      indexes.push(clusterTypeIndexFromOrigin(Material.ROCK, origin));
 
       indexes.forEach((index) => {
         if (index > -1) {
@@ -137,6 +171,16 @@ function neighbourPositionsForWorldPosition(worldPosition: THREE.Vector3): THREE
   return neighbourPositions;
 }
 
+function typeNeighboursForWorldPosition(type: Material, worldPosition: THREE.Vector3): boolean[] {
+  const neighbourPositions = neighbourPositionsForWorldPosition(worldPosition);
+
+  const neighbours = neighbourPositions.map((position, index) => {
+    return isTypeBlockAtWorldPosition(type, position);
+  });
+
+  return neighbours;
+}
+
 function neighboursForWorldPosition(worldPosition: THREE.Vector3): boolean[] {
   const neighbourPositions = neighbourPositionsForWorldPosition(worldPosition);
 
@@ -173,15 +217,18 @@ function neighboursFromHash(hash: number): boolean[] {
 }
 
 export {
-  clusterIndexFromOrigin,
+  clusterTypeIndexFromOrigin,
+  clustersAtOrigin,
   clusterOriginFromWorldPosition,
   hashFromNeighbours,
   indexFromLocalPosition,
   isBlockAtWorldPosition,
+  isTypeBlockAtWorldPosition,
   localPositionFromWorldPosition,
   neighbourClustersForWorldPosition,
   neighbourPositionsForWorldPosition,
   neighboursForWorldPosition,
+  typeNeighboursForWorldPosition,
   neighboursFromHash,
   isBlockAtBottom,
 };

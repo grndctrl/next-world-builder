@@ -18,7 +18,7 @@ interface BlockStore extends State {
 
   clusters: {
     [Material.ROCK]: ClusterType[];
-    [Material.DIRT]: ClusterType[];
+    [Material.BRICK]: ClusterType[];
   };
 
   getAllClusters: () => ClusterType[];
@@ -76,14 +76,14 @@ const state: StateCreator<BlockStore> = (set, get) => ({
       },
     ],
 
-    [Material.DIRT]: [],
+    [Material.BRICK]: [],
   },
 
   getAllClusters: () => {
     const allClusters: ClusterType[] = [];
 
     allClusters.push(...get().clusters[Material.ROCK]);
-    allClusters.push(...get().clusters[Material.DIRT]);
+    allClusters.push(...get().clusters[Material.BRICK]);
     return allClusters;
   },
 
@@ -130,14 +130,19 @@ const state: StateCreator<BlockStore> = (set, get) => ({
 
   addBlock: (type, clusterIndex, localPosition) => {
     const index = indexFromLocalPosition(localPosition);
+    const clusters = get().clusters;
+    let materialsClusters = clusters[type].slice();
+
+    materialsClusters = materialsClusters.map((cluster) => {
+      if (cluster.index === clusterIndex) {
+        cluster.blocks[index] = true;
+      }
+
+      return cluster;
+    });
 
     set(() => {
-      const clusters = get().clusters;
-      const materialsClusters = clusters[type].slice();
-
-      materialsClusters[clusterIndex].blocks[index] = true;
-
-      return { clusters: { ...clusters, [Material.ROCK]: materialsClusters } };
+      return { clusters: { ...clusters, [type]: materialsClusters } };
     });
 
     get().addClusterNeedUpdate(clusterIndex);
@@ -145,14 +150,19 @@ const state: StateCreator<BlockStore> = (set, get) => ({
 
   removeBlock: (type, clusterIndex, localPosition) => {
     const index = indexFromLocalPosition(localPosition);
+    const clusters = get().clusters;
+    let materialsClusters = clusters[type].slice();
+
+    materialsClusters = materialsClusters.map((cluster) => {
+      if (cluster.index === clusterIndex) {
+        cluster.blocks[index] = false;
+      }
+
+      return cluster;
+    });
 
     set(() => {
-      const clusters = get().clusters;
-      const materialsClusters = clusters[type].slice();
-
-      materialsClusters[clusterIndex].blocks[index] = false;
-
-      return { clusters: { ...clusters, [Material.ROCK]: materialsClusters } };
+      return { clusters: { ...clusters, [type]: materialsClusters } };
     });
 
     get().addClusterNeedUpdate(clusterIndex);
@@ -178,7 +188,7 @@ const state: StateCreator<BlockStore> = (set, get) => ({
     });
 
     set(() => {
-      return { clusters: { ...clusters, [Material.ROCK]: materialsClusters } };
+      return { clusters: { ...clusters, [type]: materialsClusters } };
     });
 
     get().addClusterNeedUpdate(clusterIndex);

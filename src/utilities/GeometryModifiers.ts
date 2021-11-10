@@ -131,7 +131,7 @@ function tesselate(geometry: THREE.BufferGeometry): THREE.BufferGeometry {
 function pushBottomFace(geometry: THREE.BufferGeometry): THREE.BufferGeometry {
   const { blockSize } = blockStore.getState();
   let modifiedGeometry = geometry.clone();
-  console.log('🚀 ~ file: GeometryModifiers.ts ~ line 134 ~ pushBottomFace ~ modifiedGeometry', modifiedGeometry);
+
   const { position, color } = modifiedGeometry.attributes;
   // const fog = new THREE.Color('#fff');
   const fog = new THREE.Color('#82b9e9');

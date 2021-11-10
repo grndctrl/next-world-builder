@@ -3,6 +3,8 @@ import createHook, { State, StateCreator } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import create from 'zustand/vanilla';
 
+import { ClusterRef, ClusterType, Material } from '@components/Cluster';
+
 interface InterfaceStore extends State {
   isPointerDown: boolean;
 
@@ -27,6 +29,12 @@ interface InterfaceStore extends State {
   pointerBlockPosition: THREE.Vector3 | null;
 
   setPointerBlockPosition: (position: THREE.Vector3) => void;
+
+  //
+
+  currentMaterial: Material;
+
+  setMaterial: (material: Material) => void;
 }
 
 const state: StateCreator<InterfaceStore> = (set, get) => ({
@@ -53,6 +61,12 @@ const state: StateCreator<InterfaceStore> = (set, get) => ({
   pointerBlockPosition: null,
 
   setPointerBlockPosition: (position) => set(() => ({ pointerBlockPosition: position })),
+
+  //
+
+  currentMaterial: Material.ROCK,
+
+  setMaterial: (material) => set(() => ({ currentMaterial: material })),
 });
 
 const interfaceStore =

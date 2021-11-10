@@ -1,15 +1,23 @@
 import { memo, useEffect, useState } from 'react';
 import * as THREE from 'three';
 
-import Cluster, { ClusterType } from '@components/Cluster';
+import Cluster, { ClusterType, Material } from '@components/Cluster';
 import { generateRockCluster } from '@components/Rock/RockUtilities';
+import { generateBrickCluster } from '@components/Brick/BrickUtilities';
 import { useBlockStore } from '@utilities/BlockStore';
 
 import RockMaterial from './Rock/RockMaterial';
 
 const generateClusterGeometry = (cluster: ClusterType): Promise<THREE.BufferGeometry> => {
   return new Promise((resolve, reject) => {
-    const geometry = generateRockCluster(cluster);
+    console.log(cluster);
+    let geometry: THREE.BufferGeometry | null = null;
+
+    if (cluster.type === Material.ROCK) {
+      geometry = generateRockCluster(cluster);
+    } else if (cluster.type === Material.BRICK) {
+      geometry = generateBrickCluster(cluster);
+    }
 
     if (geometry) {
       resolve(geometry);
@@ -24,7 +32,6 @@ const World = () => {
     cluster: ClusterType;
     geometry: THREE.BufferGeometry;
     material: React.FC;
-    // material: THREE.Material;
   }
 
   const clustersNeedUpdate = useBlockStore((state) => state.clustersNeedUpdate);
@@ -39,7 +46,7 @@ const World = () => {
   }, []);
 
   useEffect(() => {
-    console.log('clusters hook update');
+    // console.log('clusters hook update');
   }, [clusters]);
 
   // TODO: instead of rerendering complete material. Rerender specific block.
@@ -57,13 +64,6 @@ const World = () => {
               cluster: clusterByIndex,
               geometry: geometry,
               material: RockMaterial,
-              // material: new THREE.MeshPhysicalMaterial({
-              //   color: '#678',
-              //   metalness: 0,
-              //   roughness: 1,
-              //   reflectivity: 0,
-              //   vertexColors: true,
-              // }),
             };
 
             setClusters((clusters) => {
@@ -81,13 +81,6 @@ const World = () => {
               cluster: clusterByIndex,
               geometry: new THREE.BufferGeometry(),
               material: RockMaterial,
-              // material: new THREE.MeshPhysicalMaterial({
-              //   color: '#678',
-              //   metalness: 0,
-              //   roughness: 1,
-              //   reflectivity: 0,
-              //   vertexColors: true,
-              // }),
             };
 
             setClusters((clusters) => {
