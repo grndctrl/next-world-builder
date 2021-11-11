@@ -140,9 +140,14 @@ const Example = () => {
 
   return (
     block && (
-      <mesh geometry={block}>
-        <meshStandardMaterial />
-      </mesh>
+      <>
+        <mesh castShadow geometry={block}>
+          <meshStandardMaterial />
+        </mesh>
+        <mesh geometry={block}>
+          <meshStandardMaterial color={'black'} wireframe={true} />
+        </mesh>
+      </>
     )
   );
 };

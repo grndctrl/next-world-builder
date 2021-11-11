@@ -50,14 +50,6 @@ const InterfaceManager = () => {
         const localPosition = roundedVector3(worldPosition.clone().sub(clusterOrigin), 1e-6);
         const clusters = clustersAtOrigin(clusterOrigin);
 
-        // const clusterIndex = clusterTypeIndexFromOrigin(currentMaterial, clusterOrigin);
-        // if (clusterIndex > -1) {
-        //   removeBlock(currentMaterial, clusterIndex, localPosition);
-        //   neighbourClustersForWorldPosition(worldPosition).forEach((clusterIndex) => {
-        //     addClusterNeedUpdate(clusterIndex);
-        //   });
-        // }
-
         if (clusters.length > 0) {
           clusters.forEach((cluster) => {
             removeBlock(cluster.type, cluster.index, localPosition);
@@ -69,7 +61,6 @@ const InterfaceManager = () => {
         if (isWorldPositionWithinBounds(worldPosition)) {
           const clusterOrigin = clusterOriginFromWorldPosition(worldPosition);
           const clusterIndex = clusterTypeIndexFromOrigin(currentMaterial, clusterOrigin);
-          console.log('🚀 ~ file: InterfaceManager.tsx ~ line 63 ~ handlePointerUp ~ clusterIndex', clusterIndex);
           const localPosition = roundedVector3(worldPosition.clone().sub(clusterOrigin), 1e-6);
 
           if (clusterIndex > -1) {

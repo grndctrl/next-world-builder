@@ -70,8 +70,6 @@ const Cluster = ({ cluster, geometry, material }: ClusterProps) => {
   }
 
   useEffect(() => {
-    console.log('🚀 ~ file: Cluster.tsx ~ line 74 ~ useEffect ~ cluster.origin', cluster.origin);
-
     setClusterRef({
       index: cluster.index,
       origin: cluster.origin,

@@ -10,7 +10,6 @@ import RockMaterial from './Rock/RockMaterial';
 
 const generateClusterGeometry = (cluster: ClusterType): Promise<THREE.BufferGeometry> => {
   return new Promise((resolve, reject) => {
-    console.log(cluster);
     let geometry: THREE.BufferGeometry | null = null;
 
     if (cluster.type === Material.ROCK) {

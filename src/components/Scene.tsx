@@ -7,6 +7,7 @@ import World from '@components/World';
 import { MapControls, OrbitControls, OrthographicCamera, Stats } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import Example from './Brick/Example';
+import BSPExample from './Brick/BSPExample';
 
 // softShadows();
 
@@ -44,15 +45,15 @@ const Scene = () => {
       {/* <Stats /> */}
       <OrthographicCamera makeDefault position={[16, 16, 16]} near={0.1} far={128} zoom={0.25} />
 
-      <MapControls
+      {/* <MapControls
         enableRotate={true}
         maxPolarAngle={Math.PI / 3}
         minPolarAngle={Math.PI / 3}
         maxZoom={2}
         minZoom={0.25}
-      />
+      /> */}
       {/* <OrbitControls maxPolarAngle={Math.PI / 2.5} minPolarAngle={0} maxZoom={2} minZoom={0.25} /> */}
-      {/* <OrbitControls maxZoom={2} minZoom={0.25} /> */}
+      <OrbitControls maxZoom={2} minZoom={0.25} />
 
       <hemisphereLight
         position={[-2, 10, 3]}
@@ -82,6 +83,7 @@ const Scene = () => {
       {/* <Example /> */}
       {/* <CornerExample /> */}
       {/* <FacesTest /> */}
+      {/* <BSPExample /> */}
       <GroundPlane />
     </>
   );
