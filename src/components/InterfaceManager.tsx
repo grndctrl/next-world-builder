@@ -17,7 +17,7 @@ import { roundedVector3 } from '@utilities/MathUtilities';
 import { Material } from './Cluster';
 
 const InterfaceManager = () => {
-  const { intersection, setIntersection, setMaterial } = useInterfaceStore();
+  const { intersection, setIntersection, setMaterial, isWorldInteractive } = useInterfaceStore();
   const { blockSize, clusterRefs, groundPlaneRef, addBlock, removeBlock, addClusterWithBlock, addClusterNeedUpdate } =
     useBlockStore();
 
@@ -36,8 +36,9 @@ const InterfaceManager = () => {
     const currentMaterial = interfaceStore.getState().currentMaterial;
     const isPointerDragging = interfaceStore.getState().isPointerDragging;
     const intersection = interfaceStore.getState().intersection;
+    const isWorldInteractive = interfaceStore.getState().isWorldInteractive;
 
-    if (intersection && !isPointerDragging && intersection.face) {
+    if (intersection && !isPointerDragging && intersection.face && isWorldInteractive) {
       const normal = intersection.face.normal.clone().multiplyScalar(blockSize);
       const worldPosition = intersectionWorldPosition(intersection);
 
@@ -53,6 +54,9 @@ const InterfaceManager = () => {
         if (clusters.length > 0) {
           clusters.forEach((cluster) => {
             removeBlock(cluster.type, cluster.index, localPosition);
+            neighbourClustersForWorldPosition(worldPosition).forEach((clusterIndex) => {
+              addClusterNeedUpdate(clusterIndex);
+            });
           });
         }
       } else {
@@ -135,7 +139,7 @@ const InterfaceManager = () => {
   return (
     <>
       <Pointer />
-      {intersection && <PointerIndicator intersection={intersection} />}
+      {intersection && isWorldInteractive && <PointerIndicator intersection={intersection} />}
     </>
   );
 };

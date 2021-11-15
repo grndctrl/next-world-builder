@@ -48,7 +48,7 @@ function generateRockCluster(cluster: ClusterType): THREE.BufferGeometry | null 
           const worldPosition = localPosition.clone().add(cluster.origin);
           const neighbours = typeNeighboursForWorldPosition(cluster.type, worldPosition);
 
-          let block = GeometryGenerators.generateBlockSides(blockSize, 8, neighbours, new THREE.Color('#345'));
+          let block = GeometryGenerators.generateBlockSides(blockSize, 4, neighbours, new THREE.Color('#656a71'));
 
           if (block) {
             if (isBlockAtBottom(worldPosition)) {
@@ -58,10 +58,10 @@ function generateRockCluster(cluster: ClusterType): THREE.BufferGeometry | null 
             // TODO: this needs its own function
             if (!neighbours[11]) {
               const { position, color } = block.attributes;
-              const grass = new THREE.Color('#4f5566');
+              const topColor = new THREE.Color('#6a7687');
               const indices = GeometryUtilities.positionIndicesAtY(position as THREE.BufferAttribute, blockSize * 0.5);
               indices.forEach((index) => {
-                color.setXYZ(index, grass.r, grass.g, grass.b);
+                color.setXYZ(index, topColor.r, topColor.g, topColor.b);
               });
               // if (!neighbours[8] && !neighbours[10]) {
               if (!neighbours[8]) {

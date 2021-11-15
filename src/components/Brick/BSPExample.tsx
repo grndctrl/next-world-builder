@@ -1,12 +1,13 @@
 import { useEffect, useRef } from 'react';
-import { Area, BSP, contour, splitPercentage } from '@utilities/BSP';
+import { Area, BSP, contour } from '@utilities/BSP';
 import * as THREE from 'three';
 import { Sphere } from '@react-three/drei';
-import { geometryFromFaces } from '@src/utilities/GeometryUtilities';
-import { useBlockStore } from '@src/utilities/BlockStore';
+import { geometryFromFaces } from '@utilities/GeometryUtilities';
+import { useBlockStore } from '@utilities/BlockStore';
 import * as GeometryModifiers from '@utilities/GeometryModifiers';
+import SimplexNoise from '@utilities/SimplexNoise';
 
-function currentFaces(area: Area, z: number): THREE.Triangle[] {
+function frontFaces(area: Area, z: number): THREE.Triangle[] {
   return [
     new THREE.Triangle(
       new THREE.Vector3(area.x, area.y, z),
@@ -21,7 +22,7 @@ function currentFaces(area: Area, z: number): THREE.Triangle[] {
   ];
 }
 
-function nextFaces(area: Area, currZ: number, nextZ: number): THREE.Triangle[] {
+function sideFaces(area: Area, currZ: number, nextZ: number): THREE.Triangle[] {
   return [
     new THREE.Triangle(
       new THREE.Vector3(area.x, area.y, currZ),
@@ -69,6 +70,12 @@ function nextFaces(area: Area, currZ: number, nextZ: number): THREE.Triangle[] {
   ];
 }
 
+function splitPercentage(position: THREE.Vector3, deviation: number, offset: number): number {
+  const simplex = new SimplexNoise();
+  const random = simplex.random3(position.x + deviation, position.y + deviation, position.z + deviation);
+  return random * offset + (1 - offset) * 0.5;
+}
+
 const BSPExample = () => {
   const blockSize = useBlockStore((state) => state.blockSize);
   const vertices: THREE.Vector3[] = [];
@@ -77,8 +84,9 @@ const BSPExample = () => {
   let bsp = new BSP(new Area(0, 0, blockSize, blockSize));
   let horizontal = Math.random() > 0.5;
   const bsps: BSP[] = [];
+  const depth = 0.05;
 
-  bsp.split(horizontal, splitPercentage(0.33333));
+  bsp.split(horizontal, splitPercentage(new THREE.Vector3(), -1, 0.33333));
   bsps.push(bsp);
 
   let currentAreaPart = Math.random() > 0.5;
@@ -86,32 +94,30 @@ const BSPExample = () => {
   let nextArea = currentAreaPart ? bsp.b : bsp.a;
   let repeat = 3;
   let index = 0;
-  let currentZ = index * blockSize * 0.1;
-  let nextZ = (index + 1) * blockSize * 0.1;
-
-  // faces.push(...currentFaces(currentArea, currentZ));
+  let currentZ = index * blockSize * depth;
+  let nextZ = (index + 1) * blockSize * depth;
 
   // part A (simple)
   bsp = new BSP(currentArea);
-  bsp.split(!horizontal, splitPercentage(0.5));
+  bsp.split(!horizontal, splitPercentage(new THREE.Vector3(), repeat, 0.5));
   currentAreaPart = Math.random() > 0.5;
-  let lowerZ = index * blockSize * 0.1;
-  let highgerZ = (index + 2) * blockSize * 0.1;
+  let lowerZ = index * blockSize * depth;
+  let highgerZ = (index + 2) * blockSize * depth;
   let lowerPart = currentAreaPart ? bsp.a : bsp.b;
   let higherPart = currentAreaPart ? bsp.b : bsp.a;
-  faces.push(...currentFaces(lowerPart, lowerZ));
-  faces.push(...nextFaces(higherPart, lowerZ, highgerZ));
-  faces.push(...currentFaces(higherPart, highgerZ));
+  faces.push(...frontFaces(lowerPart, lowerZ));
+  faces.push(...sideFaces(higherPart, lowerZ, highgerZ));
+  faces.push(...frontFaces(higherPart, highgerZ));
 
   // part B (complex)
-  faces.push(...nextFaces(nextArea, currentZ, nextZ));
+  faces.push(...sideFaces(nextArea, currentZ, nextZ));
   while (repeat > 1) {
     index++;
     repeat--;
     horizontal = !horizontal;
 
     bsp = new BSP(nextArea);
-    bsp.split(horizontal, splitPercentage(0.33333));
+    bsp.split(horizontal, splitPercentage(new THREE.Vector3(), repeat, 0.33333));
 
     currentAreaPart = Math.random() > 0.5;
     currentArea = currentAreaPart ? bsp.a : bsp.b;
@@ -119,36 +125,19 @@ const BSPExample = () => {
 
     nextArea = currentAreaPart ? bsp.b : bsp.a;
 
-    currentZ = index * blockSize * 0.1;
-    nextZ = (index + 1) * blockSize * 0.1;
-    faces.push(...currentFaces(currentArea, currentZ));
-    faces.push(...nextFaces(nextArea, currentZ, nextZ));
+    currentZ = index * blockSize * depth;
+    nextZ = (index + 1) * blockSize * depth;
+    faces.push(...frontFaces(currentArea, currentZ));
+    faces.push(...sideFaces(nextArea, currentZ, nextZ));
 
     if (repeat === 1) {
       index++;
-      const lastZ = index * blockSize * 0.1;
+      const lastZ = index * blockSize * depth;
       bsps.push(new BSP(nextArea));
 
-      faces.push(...currentFaces(nextArea, lastZ));
+      faces.push(...frontFaces(nextArea, lastZ));
     }
   }
-
-  console.log(faces);
-
-  // for (let i = areas.length; i > 0; i--) {
-  //   const currentAreas: Area[] = [];
-
-  //   for (let j = 0; j < i; j++) {
-  //     currentAreas.push(areas[areas.length - 1 - j]);
-  //   }
-
-  //   const contourArea = contour(currentAreas);
-
-  //   vertices.push(new THREE.Vector3(contourArea.x, contourArea.y, i));
-  //   vertices.push(new THREE.Vector3(contourArea.x + contourArea.width, contourArea.y, i));
-  //   vertices.push(new THREE.Vector3(contourArea.x, contourArea.y + contourArea.height, i));
-  //   vertices.push(new THREE.Vector3(contourArea.x + contourArea.width, contourArea.y + contourArea.height, i));
-  // }
 
   let geometry = geometryFromFaces(faces);
   geometry = GeometryModifiers.edgeSplit(geometry, Math.PI / 6);
@@ -158,6 +147,9 @@ const BSPExample = () => {
       <mesh geometry={geometry}>
         <meshStandardMaterial />
       </mesh>
+      <mesh geometry={geometry}>
+        <meshBasicMaterial color={'black'} wireframe={true} />
+      </mesh>
       {/* {vertices.map((vertex, index) => (
         <Sphere key={index} position={vertex} args={[0.1]}>
           <meshBasicMaterial />
@@ -166,122 +158,5 @@ const BSPExample = () => {
     </>
   );
 };
-
-// const BSPExample = () => {
-//   const vertices: THREE.Vector3[] = [];
-
-//   let bsp = new BSP(new Area(0, 0, 4, 4));
-//   let horizontal = Math.random() > 0.5;
-//   const areas: Area[] = [];
-//   const bsps: BSP[] = [];
-//   const currentAreas = bsp.split(horizontal, splitPercentage(0.33333));
-//   let currentAreaIndex = Math.random() > 0.5 ? 0 : 1;
-//   let currentArea = currentAreaIndex === 1 ? currentAreas[0] : currentAreas[1];
-
-//   areas.push(currentArea);
-//   bsps.push(bsp);
-
-//   let nextArea = currentAreaIndex === 1 ? currentAreas[0] : currentAreas[1];
-
-//   let repeat = 2;
-//   while (repeat > 0) {
-//     repeat--;
-//     horizontal = !horizontal;
-
-//     bsp = new BSP(nextArea);
-//     const currentAreas = bsp.split(horizontal, splitPercentage(0.33333));
-
-//     currentAreaIndex = Math.random() > 0.5 ? 0 : 1;
-//     currentArea = currentAreas[currentAreaIndex];
-//     areas.push(currentArea);
-
-//     nextArea = currentAreaIndex === 1 ? currentAreas[0] : currentAreas[1];
-
-//     if (repeat === 0) {
-//       areas.push(nextArea);
-//     }
-//   }
-
-//   console.log(areas);
-
-//   for (let i = areas.length; i > 0; i--) {
-//     const currentAreas: Area[] = [];
-
-//     for (let j = 0; j < i; j++) {
-//       currentAreas.push(areas[areas.length - 1 - j]);
-//     }
-
-//     const contourArea = contour(currentAreas);
-
-//     vertices.push(new THREE.Vector3(contourArea.x, contourArea.y, i));
-//     vertices.push(new THREE.Vector3(contourArea.x + contourArea.width, contourArea.y, i));
-//     vertices.push(new THREE.Vector3(contourArea.x, contourArea.y + contourArea.height, i));
-//     vertices.push(new THREE.Vector3(contourArea.x + contourArea.width, contourArea.y + contourArea.height, i));
-//   }
-
-//   return (
-//     <>
-//       {vertices.map((vertex, index) => (
-//         <Sphere key={index} position={vertex} args={[0.1]}>
-//           <meshBasicMaterial />
-//         </Sphere>
-//       ))}
-//     </>
-//   );
-// };
-
-// const BSPExample = () => {
-//   const canvas = useRef<HTMLCanvasElement | null>(null);
-//   const context = useRef<CanvasRenderingContext2D | null>(null);
-//   let repeat = 2;
-
-//   useEffect(() => {
-//     if (canvas.current) {
-//       context.current = canvas.current.getContext('2d');
-//       if (context.current) {
-//         let bsp = new BSP(new Area(0, 0, canvas.current.width, canvas.current.height));
-//         let horizontal = Math.random() > 0.5;
-//         const areas: Area[] = [];
-//         const currentAreas = bsp.split(horizontal, splitPercentage(0.33333));
-
-//         let currentAreaIndex = Math.random() > 0.5 ? 0 : 1;
-//         let currentArea = currentAreas[currentAreaIndex];
-//         currentArea.depth = repeat + 1;
-//         areas.push(currentArea);
-
-//         let nextArea = currentAreaIndex === 1 ? currentAreas[0] : currentAreas[1];
-//         nextArea.depth = repeat;
-
-//         while (repeat > 0) {
-//           repeat--;
-//           horizontal = !horizontal;
-
-//           bsp = new BSP(nextArea);
-//           const currentAreas = bsp.split(horizontal, splitPercentage(0.33333));
-
-//           currentAreaIndex = Math.random() > 0.5 ? 0 : 1;
-//           currentArea = currentAreas[currentAreaIndex];
-//           areas.push(currentArea);
-
-//           nextArea = currentAreaIndex === 1 ? currentAreas[0] : currentAreas[1];
-//           nextArea.depth = repeat;
-
-//           if (repeat === 0) {
-//             areas.push(nextArea);
-//           }
-//         }
-
-//         console.log(areas);
-
-//         areas.forEach((area) => {
-//           context.current!.fillStyle = `rgba(0, 0, 0, ${1 - area.depth * 0.1})`;
-//           context.current!.fillRect(area.x, area.y, area.width, area.height);
-//         });
-//       }
-//     }
-//   }, []);
-
-//   return <canvas width={100} height={100} ref={canvas}></canvas>;
-// };
 
 export default BSPExample;

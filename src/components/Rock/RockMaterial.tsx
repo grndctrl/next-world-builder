@@ -6,8 +6,9 @@ import { useFrame } from '@react-three/fiber';
 const RockMaterial: React.FC = () => {
   const globalPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), -4);
   const fogPlane = new THREE.Vector4();
-  const fogDepth = 20;
+  const fogDepth = 48;
   const fogColor = 0x82b9e9;
+  // const fogColor = 0xffb9e9;
   const viewNormalMatrix = new THREE.Matrix3();
   const plane = new THREE.Plane();
 

@@ -20,6 +20,10 @@ interface InterfaceStore extends State {
 
   //
 
+  isWorldInteractive: boolean;
+
+  toggleWorldInteractive: (toggle: boolean) => void;
+
   intersection: THREE.Intersection | null;
 
   setIntersection: (intersection: THREE.Intersection | null) => void;
@@ -51,6 +55,10 @@ const state: StateCreator<InterfaceStore> = (set, get) => ({
   setPointerDownStart: (x, y) => set(() => ({ pointerDownStart: new THREE.Vector2(x, y) })),
 
   //
+
+  isWorldInteractive: true,
+
+  toggleWorldInteractive: (toggle: boolean) => set(() => ({ isWorldInteractive: toggle })),
 
   intersection: null,
 

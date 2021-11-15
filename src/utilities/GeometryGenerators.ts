@@ -12,6 +12,97 @@ import * as GeometryUtilities from '@utilities/GeometryUtilities';
  * @param {boolean[]} neighbours
  * @return {*}  {(THREE.BufferGeometry | null)}
  */
+
+function generateBlockSide(
+  blockSize: number,
+  segments: number,
+  side: THREE.Vector3,
+  color: THREE.Color = new THREE.Color('#fff')
+): THREE.BufferGeometry {
+  const plane = new THREE.PlaneBufferGeometry(blockSize, blockSize, segments, segments);
+  const { position } = plane.attributes;
+  const colors: number[] = [];
+
+  for (let i = 0; i < position.count; i++) {
+    position.setZ(i, blockSize * 0.5);
+    colors.push(color.r, color.g, color.b);
+  }
+
+  if (side.x === -1) {
+    plane.rotateY(Math.PI * -0.5);
+  } else if (side.x === 1) {
+    plane.rotateY(Math.PI * 0.5);
+  } else if (side.y === -1) {
+    plane.rotateX(Math.PI * 0.5);
+  } else if (side.y === 1) {
+    plane.rotateX(Math.PI * -0.5);
+  } else if (side.z === -1) {
+    plane.rotateY(Math.PI * 1);
+  } else if (side.z === 1) {
+    // do nothing
+  }
+
+  plane.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  plane.deleteAttribute('uv');
+
+  return plane;
+}
+
+function generateBlockSideHalf(
+  blockSize: number,
+  segments: number,
+  side: THREE.Vector3,
+  half: THREE.Vector2,
+  color: THREE.Color = new THREE.Color('#fff')
+): THREE.BufferGeometry {
+  let width = blockSize;
+  let height = blockSize;
+
+  if (half.y === 0) {
+    width *= 0.5;
+  } else if (half.x === 0) {
+    height *= 0.5;
+  }
+
+  const plane = new THREE.PlaneBufferGeometry(width, height, segments, segments);
+  const { position } = plane.attributes;
+  const colors: number[] = [];
+
+  for (let i = 0; i < position.count; i++) {
+    if (half.x === -1) {
+      position.setX(i, position.getX(i) - width * 0.5);
+    } else if (half.x === 1) {
+      position.setX(i, position.getX(i) + width * 0.5);
+    } else if (half.y === -1) {
+      position.setY(i, position.getY(i) - height * 0.5);
+    } else if (half.y === 1) {
+      position.setY(i, position.getY(i) + height * 0.5);
+    }
+
+    position.setZ(i, blockSize * 0.5);
+    colors.push(color.r, color.g, color.b);
+  }
+
+  if (side.x === -1) {
+    plane.rotateY(Math.PI * -0.5);
+  } else if (side.x === 1) {
+    plane.rotateY(Math.PI * 0.5);
+  } else if (side.y === -1) {
+    plane.rotateX(Math.PI * 0.5);
+  } else if (side.y === 1) {
+    plane.rotateX(Math.PI * -0.5);
+  } else if (side.z === -1) {
+    plane.rotateY(Math.PI * 1);
+  } else if (side.z === 1) {
+    // do nothing
+  }
+
+  plane.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  plane.deleteAttribute('uv');
+
+  return plane;
+}
+
 function generateBlockSides(
   blockSize: number,
   segments: number,
@@ -20,37 +111,18 @@ function generateBlockSides(
 ): THREE.BufferGeometry | null {
   const sides = [];
 
+  // -X axis
   if (!neighbours[8]) {
-    const plane = new THREE.PlaneBufferGeometry(blockSize, blockSize, 4, 4);
-    plane.rotateY(Math.PI * -0.5);
+    const side = generateBlockSide(blockSize, segments, new THREE.Vector3(-1, 0, 0), color);
 
-    const { position } = plane.attributes;
-    const colors: number[] = [];
-
-    for (let i = 0; i < position.count; i++) {
-      position.setX(i, -blockSize * 0.5);
-      colors.push(color.r, color.g, color.b);
-    }
-
-    plane.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-    sides.push(plane);
+    sides.push(side);
   }
 
   // +X axis
   if (!neighbours[9]) {
-    const plane = new THREE.PlaneBufferGeometry(blockSize, blockSize, 4, 4);
-    plane.rotateY(Math.PI * 0.5);
+    const side = generateBlockSide(blockSize, segments, new THREE.Vector3(1, 0, 0), color);
 
-    const { position } = plane.attributes;
-    const colors: number[] = [];
-
-    for (let i = 0; i < position.count; i++) {
-      position.setX(i, blockSize * 0.5);
-      colors.push(color.r, color.g, color.b);
-    }
-
-    plane.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-    sides.push(plane);
+    sides.push(side);
   }
 
   // -Y axis
@@ -85,6 +157,7 @@ function generateBlockSides(
     }
 
     plane.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+    plane.deleteAttribute('uv');
     sides.push(plane);
   }
 
@@ -120,40 +193,22 @@ function generateBlockSides(
     }
 
     plane.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+    plane.deleteAttribute('uv');
     sides.push(plane);
   }
 
   // -Z axis
   if (!neighbours[2]) {
-    const plane = new THREE.PlaneBufferGeometry(blockSize, blockSize, 4, 4);
-    plane.rotateY(-Math.PI);
+    const side = generateBlockSide(blockSize, segments, new THREE.Vector3(0, 0, -1), color);
 
-    const { position } = plane.attributes;
-    const colors: number[] = [];
-
-    for (let i = 0; i < position.count; i++) {
-      position.setZ(i, blockSize * -0.5);
-      colors.push(color.r, color.g, color.b);
-    }
-
-    plane.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-    sides.push(plane);
+    sides.push(side);
   }
 
   // +Z axis
   if (!neighbours[15]) {
-    const plane = new THREE.PlaneBufferGeometry(blockSize, blockSize, 4, 4);
+    const side = generateBlockSide(blockSize, segments, new THREE.Vector3(0, 0, 1), color);
 
-    const { position } = plane.attributes;
-    const colors: number[] = [];
-
-    for (let i = 0; i < position.count; i++) {
-      position.setZ(i, blockSize * 0.5);
-      colors.push(color.r, color.g, color.b);
-    }
-
-    plane.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-    sides.push(plane);
+    sides.push(side);
   }
 
   if (sides.length === 0) {
@@ -163,4 +218,4 @@ function generateBlockSides(
   return mergeBufferGeometries(sides);
 }
 
-export { generateBlockSides };
+export { generateBlockSides, generateBlockSide, generateBlockSideHalf };

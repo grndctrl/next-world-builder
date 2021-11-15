@@ -133,12 +133,12 @@ function pushBottomFace(geometry: THREE.BufferGeometry): THREE.BufferGeometry {
   let modifiedGeometry = geometry.clone();
 
   const { position, color } = modifiedGeometry.attributes;
-  // const fog = new THREE.Color('#fff');
-  const fog = new THREE.Color('#82b9e9');
+  const fog = new THREE.Color('#fff');
+  // const fog = new THREE.Color('#82b9e9');
 
   const indices = GeometryUtilities.positionIndicesAtY(position as THREE.BufferAttribute, blockSize * -0.5);
   indices.forEach((index) => {
-    position.setY(index, -20);
+    position.setY(index, -48);
     color.setXYZ(index, fog.r, fog.g, fog.b);
   });
 

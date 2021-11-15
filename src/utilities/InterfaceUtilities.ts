@@ -26,12 +26,12 @@ function intersectionWorldPosition(intersection: THREE.Intersection): THREE.Vect
 
 function isWorldPositionWithinBounds(position: THREE.Vector3): boolean {
   if (
-    position.x < -16 ||
-    position.x > 16 ||
-    position.z < -16 ||
-    position.z > 16 ||
-    position.y < -4 ||
-    position.y > 27
+    position.x < -64 ||
+    position.x > 64 ||
+    position.z < -64 ||
+    position.z > 64 ||
+    position.y < -6 ||
+    position.y > 32
   ) {
     return false;
   }

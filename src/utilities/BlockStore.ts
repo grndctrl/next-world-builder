@@ -51,7 +51,7 @@ interface BlockStore extends State {
 }
 
 const blocksPerClusterAxis = 4;
-const blockSize = 2;
+const blockSize = 4;
 const clusterSize = blocksPerClusterAxis * blockSize;
 const initialBlocks = Array.from({ length: blocksPerClusterAxis * blocksPerClusterAxis * blocksPerClusterAxis }).map(
   (block) => true

@@ -73,8 +73,4 @@ function contour(areas: Area[]): Area {
   return new Area(minX, minY, maxX - minX, maxY - minY);
 }
 
-function splitPercentage(offset: number): number {
-  return Math.random() * offset + (1 - offset) * 0.5;
-}
-
-export { Area, BSP, contour, splitPercentage };
+export { Area, BSP, contour };

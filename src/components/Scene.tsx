@@ -43,38 +43,38 @@ const Scene = () => {
   return (
     <>
       {/* <Stats /> */}
-      <OrthographicCamera makeDefault position={[16, 16, 16]} near={0.1} far={128} zoom={0.25} />
-
-      {/* <MapControls
+      <OrthographicCamera makeDefault position={[32, 32, 32]} near={0.1} far={128} zoom={0.25} />
+      {/* 
+      <MapControls
         enableRotate={true}
         maxPolarAngle={Math.PI / 3}
         minPolarAngle={Math.PI / 3}
         maxZoom={2}
         minZoom={0.25}
       /> */}
-      {/* <OrbitControls maxPolarAngle={Math.PI / 2.5} minPolarAngle={0} maxZoom={2} minZoom={0.25} /> */}
-      <OrbitControls maxZoom={2} minZoom={0.25} />
+      <OrbitControls maxPolarAngle={Math.PI / 2.5} minPolarAngle={0} maxZoom={0.5} minZoom={0.125} />
+      {/* <OrbitControls maxZoom={2} minZoom={0.25} /> */}
 
       <hemisphereLight
         position={[-2, 10, 3]}
         color={new THREE.Color('#f8a')}
         groundColor={new THREE.Color('#248')}
-        intensity={0.75}
+        intensity={0.5}
       />
       <directionalLight
         ref={light}
-        color={'#fdb'}
+        color={'#fed'}
         intensity={0.5}
-        position={[-2, 10, 3]}
+        position={[-7, 24, 8]}
         castShadow
         shadow-bias={0.001}
         shadow-mapSize-width={4096}
         shadow-mapSize-height={4096}
-        shadow-camera-near={1}
+        shadow-camera-near={0.1}
         shadow-camera-far={32}
-        shadow-camera-left={-16}
-        shadow-camera-right={16}
-        shadow-camera-top={16}
+        shadow-camera-left={-32}
+        shadow-camera-right={32}
+        shadow-camera-top={32}
         shadow-camera-bottom={-16}
       />
 
