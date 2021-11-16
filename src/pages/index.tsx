@@ -4,6 +4,8 @@ import Head from 'next/head';
 import Scene from '@components/Scene';
 import { Canvas } from '@react-three/fiber';
 import Toolbar from '@src/components/Toolbar';
+import ExportButton from '@src/components/ExportButton';
+import ImportButton from '@src/components/ImportButton';
 
 const Home: NextPage = () => {
   return (
@@ -19,6 +21,7 @@ const Home: NextPage = () => {
           <Scene />
         </Canvas>
         <Toolbar />
+
         <div className="fixed bottom-0 left-0 m-8 font-mono text-white">
           LMB: Add block
           <br />

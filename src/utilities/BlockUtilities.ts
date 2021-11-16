@@ -1,7 +1,7 @@
 import { uniq } from 'lodash';
 import * as THREE from 'three';
 
-import { ClusterType, Material } from '@components/Cluster';
+import { ClustersType, ClusterType, Material } from '@components/Cluster';
 import { blockStore } from '@utilities/BlockStore';
 import { roundedVector3 } from '@utilities/MathUtilities';
 
@@ -108,6 +108,7 @@ function isBlockAtWorldPosition(worldPosition: THREE.Vector3): boolean {
   let block = false;
 
   allClusters.forEach((cluster) => {
+    // console.log(cluster.origin);
     if (cluster.origin.equals(clusterOrigin)) {
       block = block === false ? cluster.blocks[index] : true;
     }
@@ -201,6 +202,35 @@ function hashFromNeighbours(neighbours: boolean[]): number {
   return hash;
 }
 
+function parseImportedClusters(importedClusters: string): ClustersType {
+  const parsedClusters = JSON.parse(importedClusters);
+
+  const rockClusters = parsedClusters[Material.ROCK].map(
+    (parsedCluster: ClusterType) =>
+      ({
+        index: parsedCluster.index,
+        type: parsedCluster.type as Material,
+        origin: new THREE.Vector3(parsedCluster.origin.x, parsedCluster.origin.y, parsedCluster.origin.z),
+        blocks: parsedCluster.blocks,
+      } as ClusterType)
+  );
+
+  const brickClusters = parsedClusters[Material.BRICK].map(
+    (parsedCluster: ClusterType) =>
+      ({
+        index: parsedCluster.index,
+        type: parsedCluster.type as Material,
+        origin: new THREE.Vector3(parsedCluster.origin.x, parsedCluster.origin.y, parsedCluster.origin.z),
+        blocks: parsedCluster.blocks,
+      } as ClusterType)
+  );
+
+  return {
+    [Material.ROCK]: rockClusters,
+    [Material.BRICK]: brickClusters,
+  };
+}
+
 function neighboursFromHash(hash: number): boolean[] {
   let neighbours = Array.from({ length: 18 }).map(() => false);
 
@@ -217,18 +247,19 @@ function neighboursFromHash(hash: number): boolean[] {
 }
 
 export {
+  clusterOriginFromWorldPosition,
   clusterTypeIndexFromOrigin,
   clustersAtOrigin,
-  clusterOriginFromWorldPosition,
   hashFromNeighbours,
   indexFromLocalPosition,
+  isBlockAtBottom,
   isBlockAtWorldPosition,
   isTypeBlockAtWorldPosition,
   localPositionFromWorldPosition,
   neighbourClustersForWorldPosition,
   neighbourPositionsForWorldPosition,
   neighboursForWorldPosition,
-  typeNeighboursForWorldPosition,
   neighboursFromHash,
-  isBlockAtBottom,
+  parseImportedClusters,
+  typeNeighboursForWorldPosition,
 };

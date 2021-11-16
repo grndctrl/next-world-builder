@@ -3,9 +3,9 @@ import createHook, { State, StateCreator } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import create from 'zustand/vanilla';
 
-import { ClusterRef, ClusterType, Material } from '@components/Cluster';
+import { ClusterRef, ClustersType, ClusterType, Material } from '@components/Cluster';
 import { GroundPlaneRef } from '@components/GroundPlane';
-import { indexFromLocalPosition } from '@utilities/BlockUtilities';
+import { indexFromLocalPosition, parseImportedClusters } from '@utilities/BlockUtilities';
 
 interface BlockStore extends State {
   blocksPerClusterAxis: number;
@@ -16,10 +16,7 @@ interface BlockStore extends State {
 
   //
 
-  clusters: {
-    [Material.ROCK]: ClusterType[];
-    [Material.BRICK]: ClusterType[];
-  };
+  clusters: ClustersType;
 
   getAllClusters: () => ClusterType[];
 
@@ -48,6 +45,12 @@ interface BlockStore extends State {
   groundPlaneRef: GroundPlaneRef | null;
 
   setGroundPlaneRef: (ref: GroundPlaneRef) => void;
+
+  //
+
+  exportClusters: () => string;
+
+  importClusters: (clusters: string) => void;
 }
 
 const blocksPerClusterAxis = 4;
@@ -199,6 +202,26 @@ const state: StateCreator<BlockStore> = (set, get) => ({
   groundPlaneRef: null,
 
   setGroundPlaneRef: (ref) => set((state) => ({ groundPlaneRef: ref })),
+
+  //
+
+  exportClusters: () => {
+    const clusters = get().clusters;
+
+    const json = JSON.stringify(clusters);
+
+    return json;
+  },
+
+  importClusters: (clusters) => {
+    const parsedClusters = parseImportedClusters(clusters);
+
+    const allClusters = [...parsedClusters[Material.ROCK], ...parsedClusters[Material.BRICK]];
+    const indices = allClusters.map((cluster) => cluster.index);
+
+    set(() => ({ clusters: parsedClusters }));
+    get().setClustersNeedUpdate(indices);
+  },
 });
 
 const blockStore =

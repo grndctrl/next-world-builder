@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
 import Pointer from '@components/Pointer';
@@ -15,12 +15,15 @@ import { interfaceStore, useInterfaceStore } from '@utilities/InterfaceStore';
 import { intersectionWorldPosition, isWorldPositionWithinBounds } from '@utilities/InterfaceUtilities';
 import { roundedVector3 } from '@utilities/MathUtilities';
 import { Material } from './Cluster';
+import { Html } from '@react-three/drei';
 
 const InterfaceManager = () => {
   const { intersection, setIntersection, setMaterial, isWorldInteractive } = useInterfaceStore();
   const { blockSize, clusterRefs, groundPlaneRef, addBlock, removeBlock, addClusterWithBlock, addClusterNeedUpdate } =
     useBlockStore();
 
+  const audioAdd = useRef<HTMLAudioElement | null>(null);
+  const audioRemove = useRef<HTMLAudioElement | null>(null);
   const raycaster = new THREE.Raycaster();
 
   useEffect(() => {
@@ -57,6 +60,11 @@ const InterfaceManager = () => {
             neighbourClustersForWorldPosition(worldPosition).forEach((clusterIndex) => {
               addClusterNeedUpdate(clusterIndex);
             });
+            if (audioRemove.current) {
+              audioRemove.current.pause();
+              audioRemove.current.currentTime = 0;
+              audioRemove.current.play();
+            }
           });
         }
       } else {
@@ -68,16 +76,27 @@ const InterfaceManager = () => {
           const localPosition = roundedVector3(worldPosition.clone().sub(clusterOrigin), 1e-6);
 
           if (clusterIndex > -1) {
-            console.log('worldPosition', worldPosition);
             addBlock(currentMaterial, clusterIndex, localPosition);
             neighbourClustersForWorldPosition(worldPosition).forEach((clusterIndex) => {
               addClusterNeedUpdate(clusterIndex);
             });
+
+            if (audioAdd.current) {
+              audioAdd.current.pause();
+              audioAdd.current.currentTime = 0;
+              audioAdd.current.play();
+            }
           } else {
             addClusterWithBlock(currentMaterial, clusterOrigin, localPosition);
             neighbourClustersForWorldPosition(worldPosition).forEach((clusterIndex) => {
               addClusterNeedUpdate(clusterIndex);
             });
+
+            if (audioAdd.current) {
+              audioAdd.current.pause();
+              audioAdd.current.currentTime = 0;
+              audioAdd.current.play();
+            }
           }
         }
       }
@@ -138,6 +157,14 @@ const InterfaceManager = () => {
 
   return (
     <>
+      <Html>
+        <audio ref={audioAdd}>
+          <source src="/add.mp3" />
+        </audio>
+        <audio ref={audioRemove}>
+          <source src="/remove.mp3" />
+        </audio>
+      </Html>
       <Pointer />
       {intersection && isWorldInteractive && <PointerIndicator intersection={intersection} />}
     </>

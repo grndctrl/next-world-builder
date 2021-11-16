@@ -16,6 +16,10 @@ export interface ClusterType {
   origin: THREE.Vector3;
   blocks: boolean[];
 }
+export interface ClustersType {
+  [Material.ROCK]: ClusterType[];
+  [Material.BRICK]: ClusterType[];
+}
 
 export interface ClusterRef {
   index: number;
