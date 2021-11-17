@@ -43,7 +43,7 @@ const Scene = () => {
   return (
     <>
       {/* <Stats /> */}
-      <OrthographicCamera makeDefault position={[32, 32, 32]} near={0.1} far={128} zoom={0.25} />
+      <OrthographicCamera makeDefault position={[64, 64, 64]} near={0.1} far={512} zoom={0.25} />
       {/* 
       <MapControls
         enableRotate={true}
